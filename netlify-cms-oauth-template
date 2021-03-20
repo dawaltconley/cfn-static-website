@@ -1,0 +1,225 @@
+AWSTemplateFormatVersion: 2010-09-09
+Metadata:
+  'AWS::CloudFormation::Designer':
+    4c15728d-c86b-4553-a5ec-1e9ea3378855:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 1080
+        'y': 210
+      z: 0
+      embeds: []
+      iscontainedinside:
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+    38d19374-6146-4cb6-845e-de8498e3f3bc:
+      size:
+        width: 560
+        height: 310
+      position:
+        x: 390
+        'y': -70
+      z: 0
+      embeds:
+        - 9b5c67df-5a2c-4cce-b083-bcf88b51a37b
+        - c140eccb-40bc-4970-95cb-6aa601ad247b
+        - fc45969a-fa1f-486c-88b9-1d84c365bb1e
+        - 3203d24a-15a0-4ba7-9c81-10f44e9b6fcd
+    fc45969a-fa1f-486c-88b9-1d84c365bb1e:
+      size:
+        width: 140
+        height: 110
+      position:
+        x: 430
+        'y': -30
+      z: 1
+      parent: 38d19374-6146-4cb6-845e-de8498e3f3bc
+      embeds: []
+      iscontainedinside:
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+    9b5c67df-5a2c-4cce-b083-bcf88b51a37b:
+      size:
+        width: 80
+        height: 80
+      position:
+        x: 800
+        'y': -30
+      z: 1
+      parent: 38d19374-6146-4cb6-845e-de8498e3f3bc
+      embeds: []
+      iscontainedinside:
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+    3203d24a-15a0-4ba7-9c81-10f44e9b6fcd:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 430
+        'y': 130
+      z: 1
+      parent: 38d19374-6146-4cb6-845e-de8498e3f3bc
+      embeds: []
+      iscontainedinside:
+        - fc45969a-fa1f-486c-88b9-1d84c365bb1e
+        - fc45969a-fa1f-486c-88b9-1d84c365bb1e
+        - fc45969a-fa1f-486c-88b9-1d84c365bb1e
+        - fc45969a-fa1f-486c-88b9-1d84c365bb1e
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - fc45969a-fa1f-486c-88b9-1d84c365bb1e
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+    719766a2-60e5-4d2f-b991-bba27ce50866:
+      source:
+        id: 3203d24a-15a0-4ba7-9c81-10f44e9b6fcd
+      target:
+        id: 38d19374-6146-4cb6-845e-de8498e3f3bc
+      z: 12
+    c140eccb-40bc-4970-95cb-6aa601ad247b:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 820
+        'y': 130
+      z: 1
+      parent: 38d19374-6146-4cb6-845e-de8498e3f3bc
+      embeds: []
+      iscontainedinside:
+        - 9b5c67df-5a2c-4cce-b083-bcf88b51a37b
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 9b5c67df-5a2c-4cce-b083-bcf88b51a37b
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+        - 38d19374-6146-4cb6-845e-de8498e3f3bc
+    42c3c283-6af5-4723-9164-30bcde276589:
+      source:
+        id: c140eccb-40bc-4970-95cb-6aa601ad247b
+      target:
+        id: 38d19374-6146-4cb6-845e-de8498e3f3bc
+      z: 12
+    46063a93-44ad-4354-a76f-9f26e806afb0:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 420
+        'y': 320
+      z: 0
+      embeds: []
+    433a9afe-6708-441c-a6ae-4b0d12674390:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 810
+        'y': 310
+      z: 0
+      embeds: []
+    5efdd852-0c6d-4329-9d08-2d15d1c38051:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 233.77862804418837
+        'y': 232.05623440850255
+      z: 0
+      isassociatedwith:
+        - 46063a93-44ad-4354-a76f-9f26e806afb0
+    d33c69a4-3ece-4291-990d-ab34af849de6:
+      source:
+        id: 5efdd852-0c6d-4329-9d08-2d15d1c38051
+      target:
+        id: 46063a93-44ad-4354-a76f-9f26e806afb0
+      z: 11
+Resources:
+  AGS2LLDK:
+    Type: 'AWS::ApiGateway::Stage'
+    Properties:
+      RestApiId: !Ref OAuthAPI
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 4c15728d-c86b-4553-a5ec-1e9ea3378855
+  AuthResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref OAuthAPI
+      ParentId: !Ref OAuthAPI
+      PathPart: /auth
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: fc45969a-fa1f-486c-88b9-1d84c365bb1e
+  OAuthAPI:
+    Type: 'AWS::ApiGateway::RestApi'
+    Properties: {}
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 38d19374-6146-4cb6-845e-de8498e3f3bc
+  CallbackResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref OAuthAPI
+      ParentId: !Ref OAuthAPI
+      PathPart: /callback
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 9b5c67df-5a2c-4cce-b083-bcf88b51a37b
+  AGM2TZDW:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      ResourceId: !Ref AuthResource
+      HttpMethod: get
+      RestApiId: !Ref OAuthAPI
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 3203d24a-15a0-4ba7-9c81-10f44e9b6fcd
+  AGM1FPAM:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      ResourceId: !Ref CallbackResource
+      RestApiId: !Ref OAuthAPI
+      HttpMethod: get
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: c140eccb-40bc-4970-95cb-6aa601ad247b
+  AuthRedirect:
+    Type: 'AWS::Lambda::Function'
+    Properties: {}
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 46063a93-44ad-4354-a76f-9f26e806afb0
+  TokenHandler:
+    Type: 'AWS::Lambda::Function'
+    Properties: {}
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 433a9afe-6708-441c-a6ae-4b0d12674390
+  LP1HE8H:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !Ref AuthRedirect
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 5efdd852-0c6d-4329-9d08-2d15d1c38051
