@@ -29,6 +29,14 @@ Parameters:
       - TLSv1.1_2016
       - TLSv1_2016
       - TLSv1
+  CachePolicy:
+    Type: String
+    Description: Managed CloudFront cache policy to use.
+    Default: CachingOptimized
+    AllowedValues:
+      - CachingOptimized
+      - CachingOptimizedForUncompressedObjects
+      - CachingDisabled
   # Customer:
   #   Type: String
   #   Description: The customer name, used for tagging.
@@ -43,6 +51,15 @@ Parameters:
   #   - AcmCertificateArn
   #   - IamCertificateId
   #   - CreateAcmCertificate
+
+Mappings:
+  ManagedCachePolicies:
+    CachingOptimized:
+      Id: 658327ea-f89d-4fab-a63d-7e88639e58f6
+    CachingOptimizedForUncompressedObjects:
+      Id: b2884449-e4de-46a7-ac36-70bc7f1ddd6d
+    CachingDisabled:
+      Id: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
 
 Resources:
 
@@ -97,13 +114,16 @@ Resources:
         HttpVersion: http2
         IPV6Enabled: true
         PriceClass: !Ref CloudFrontPriceClass
-        DefaultRootObject: !Ref DefaultRootObject # TODO: this should probably be AWS::NoValue if using LambdaEdge...
         ViewerCertificate:
           AcmCertificateArn: !Ref Certificate
           MinimumProtocolVersion: !Ref CloudFrontSecurityPolicy
           SslSupportMethod: sni-only
         DefaultCacheBehavior:
           TargetOriginId: s3origin
+          CachePolicyId: !FindInMap
+            - ManagedCachePolicies
+            - !Ref CachePolicy
+            - Id
           ViewerProtocolPolicy: 'redirect-to-https'
           AllowedMethods:
             - GET
@@ -114,13 +134,6 @@ Resources:
             - HEAD
             - OPTIONS
           Compress: true
-          DefaultTTL: 86400 # deprecated... one day. widdix uses 3600, one hr
-          MinTTL: 0 # deprecated... using origin cache headers? zero if I wanna keep doing this?
-          MaxTTL: 31536000 # deprecated: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-distribution-defaultcachebehavior.html#cfn-cloudfront-distribution-defaultcachebehavior-maxttl
-          ForwardedValues: # deprecated: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-distribution-forwardedvalues.html
-            Cookies:
-              Forward: none
-            QueryString: false
           # LambdaFunctionAssociations: # TODO: LambdaEdge stuff
   OriginAccessIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
