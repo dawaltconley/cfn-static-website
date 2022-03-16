@@ -37,6 +37,13 @@ Parameters:
       - CachingOptimized
       - CachingOptimizedForUncompressedObjects
       - CachingDisabled
+  RedirectRules:
+    Type: String
+    Default: PrettyUrls
+    AllowedValues:
+      - PrettyUrls
+      - WWWDomain
+      - WWWDomain_PrettyUrls
   # Customer:
   #   Type: String
   #   Description: The customer name, used for tagging.
@@ -134,7 +141,9 @@ Resources:
             - HEAD
             - OPTIONS
           Compress: true
-          # LambdaFunctionAssociations: # TODO: LambdaEdge stuff
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !Sub 'arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:function/${RedirectRules}'
   OriginAccessIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
     Properties:
