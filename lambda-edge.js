@@ -11,15 +11,15 @@ exports.handler = async function(event) {
             headers: {
                 location: [{
                     key: 'Location',
-                    value: `https://${!domainName}${!cf.request.uri}`,
+                    value: `https://${domainName}${cf.request.uri}`,
                 }],
             }
         };
     }
     if (cf.request.uri.endsWith('/')) {
-        return Object.assign({}, cf.request, {uri: `${!cf.request.uri}${!indexDocument}`});
+        return Object.assign({}, cf.request, {uri: `${cf.request.uri}${indexDocument}`});
     }
-    if (cf.request.uri.endsWith(`/${!indexDocument}`)) {
+    if (cf.request.uri.endsWith(`/${indexDocument}`)) {
         return {
             status: '302',
             statusDescription: 'Found',
@@ -38,7 +38,7 @@ exports.handler = async function(event) {
             headers: {
                 location: [{
                     key: 'Location',
-                    value: `${!cf.request.uri}/`,
+                    value: `${cf.request.uri}/`,
                 }],
             }
         };
