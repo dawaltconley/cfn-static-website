@@ -1,0 +1,146 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: A template for launching static sites on AWS.
+Parameters:
+  Domain:
+    Type: String
+    Description: Base domain name for the static website.
+  # HostedZone: # use to conditionally create a hosted zone?
+  #   Type: AWS::Route53::HostedZone::Id
+  DefaultRootObject:
+    Description: The name of the index document for the website (ignored when LambdaEdgeSubdirectoriesVersionArn is set).
+    Type: String
+    Default: index.html
+  CloudFrontPriceClass:
+    Type: String
+    Description: Price class for CloudFront distribution.
+    Default: PriceClass_All
+    AllowedValues:     # TODO: some way to map these?
+      - PriceClass_100 # North America, Europe
+      - PriceClass_200 # + Asia, Middle East, Africa
+      - PriceClass_All # + South America, Oceania
+  CloudFrontSecurityPolicy:
+    Type: String
+    Description: The minimum security policy for the CloudFront distribution.
+    Default: TLSv1.2_2021
+    AllowedValues:
+      - TLSv1.2_2021
+      - TLSv1.2_2019
+      - TLSv1.2_2018
+      - TLSv1.1_2016
+      - TLSv1_2016
+      - TLSv1
+  # Customer:
+  #   Type: String
+  #   Description: The customer name, used for tagging.
+  # Access:
+  #   Type: String
+  #   Description: Name of the access group, used for tagging.
+  # CertificateType:
+  #   Description: 'Indicates whether to use the certificate from the AWS Certificate Manager or AWS Identity and Access Management. CreateAcmCertificate only works in the us-east-1 region!'
+  #   Type: String
+  #   Default: IamCertificateId
+  #   AllowedValues:
+  #   - AcmCertificateArn
+  #   - IamCertificateId
+  #   - CreateAcmCertificate
+
+Resources:
+
+  # ACM
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref Domain
+      SubjectAlternativeNames:
+        - !Sub '*.${Domain}'
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref Domain
+          HostedZoneId: !Ref HostedZone
+
+  # Route53
+  HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !Sub '${Domain}.'
+  RecordSetGroup:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneName: !Sub '${Domain}.'
+      RecordSets:
+        - Name: !Ref Domain # TODO: needs to be the primary domain, so example.com or www.example.com
+          Type: A
+          AliasTarget:
+            HostedZoneId: Z2FDTNDATAQYW2 # Magic CloudFront number
+            DNSName: !GetAtt Distribution.DomainName
+        - Name: !Sub 'www.${Domain}' # TODO: make flexible
+          Type: A
+          AliasTarget:
+            HostedZoneId: Z2FDTNDATAQYW2 # Magic CloudFront number
+            DNSName: !GetAtt Distribution.DomainName
+
+  # CloudFront
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: !Ref Domain
+        Aliases: # TODO: make this more flexible
+          - !Ref Domain
+          - !Sub 'www.${Domain}'
+        Origins:
+          - DomainName: !GetAtt SiteBucket.DomainName
+            Id: s3origin
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub 'origin-access-identity/cloudfront/${OriginAccessIdentity}'
+        Enabled: true
+        HttpVersion: http2
+        IPV6Enabled: true
+        PriceClass: !Ref CloudFrontPriceClass
+        DefaultRootObject: !Ref DefaultRootObject # TODO: this should probably be AWS::NoValue if using LambdaEdge...
+        ViewerCertificate:
+          AcmCertificateArn: !Ref Certificate
+          MinimumProtocolVersion: !Ref CloudFrontSecurityPolicy
+          SslSupportMethod: sni-only
+        DefaultCacheBehavior:
+          TargetOriginId: s3origin
+          ViewerProtocolPolicy: 'redirect-to-https'
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          Compress: true
+          DefaultTTL: 86400 # deprecated... one day. widdix uses 3600, one hr
+          MinTTL: 0 # deprecated... using origin cache headers? zero if I wanna keep doing this?
+          MaxTTL: 31536000 # deprecated: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-distribution-defaultcachebehavior.html#cfn-cloudfront-distribution-defaultcachebehavior-maxttl
+          ForwardedValues: # deprecated: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cloudfront-distribution-forwardedvalues.html
+            Cookies:
+              Forward: none
+            QueryString: false
+          # LambdaFunctionAssociations: # TODO: LambdaEdge stuff
+  OriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Ref Domain # TODO: this is arbitrary?
+
+  # S3
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref Domain
+  SiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SiteBucket
+      PolicyDocument:
+        Statement:
+          - Action: 's3:GetObject'
+            Effect: Allow
+            Resource: !Sub '${SiteBucket.Arn}/*'
+            Principal:
+              CanonicalUser: !GetAtt OriginAccessIdentity.S3CanonicalUserId
