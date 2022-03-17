@@ -25,7 +25,7 @@ Parameters:
       - TLSv1.1_2016
       - TLSv1_2016
       - TLSv1
-  CachePolicy:
+  CloudFrontCachePolicy:
     Type: String
     Description: Managed CloudFront cache policy to use.
     Default: CachingOptimized
@@ -125,7 +125,7 @@ Resources:
           TargetOriginId: s3origin
           CachePolicyId: !FindInMap
             - ManagedCachePolicies
-            - !Ref CachePolicy
+            - !Ref CloudFrontCachePolicy
             - Id
           ViewerProtocolPolicy: 'redirect-to-https'
           AllowedMethods:
