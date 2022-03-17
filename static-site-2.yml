@@ -6,10 +6,6 @@ Parameters:
     Description: Base domain name for the static website.
   # HostedZone: # use to conditionally create a hosted zone?
   #   Type: AWS::Route53::HostedZone::Id
-  DefaultRootObject:
-    Description: The name of the index document for the website (ignored when LambdaEdgeSubdirectoriesVersionArn is set).
-    Type: String
-    Default: index.html
   CloudFrontPriceClass:
     Type: String
     Description: Price class for CloudFront distribution.
