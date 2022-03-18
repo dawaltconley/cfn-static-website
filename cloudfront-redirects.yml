@@ -50,7 +50,7 @@ Resources:
             return {
               statusCode: 302,
               statusDescription: 'Found',
-              headers: { location: { value: 'https://' + domain + uri } },
+              headers: { location: { value: uri } },
             };
           }
 
