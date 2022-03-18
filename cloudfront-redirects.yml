@@ -55,19 +55,19 @@ Resources:
           }
 
           function handler(event) {
-              var request = event.request;
-              var uri = request.uri;
-              ${SubdomainRedirect}
-              if (uri.endsWith('/')) {
-                ${UriTrailingSlash}
-              }
-              if (uri.endsWith('/' + indexDocument)) {
-                ${UriIndexDocument}
-              }
-              if (!uri.includes('.')) {
-                ${UriNoTrailingSlash}
-              }
-              return request;
+            var request = event.request;
+            var uri = request.uri;
+            ${SubdomainRedirect}
+            if (uri.endsWith('/')) {
+              ${UriTrailingSlash}
+            }
+            if (uri.endsWith('/' + indexDocument)) {
+              ${UriIndexDocument}
+            }
+            if (!uri.includes('.')) {
+              ${UriNoTrailingSlash}
+            }
+            return request;
           }
         - RedirectTo: !If [ IsApex, !Ref Domain, !Sub '${RedirectToSubdomain}.${Domain}' ]
           RedirectFrom: !If [ RedirectFromApex, !Ref Domain, !Sub '${RedirectFromSubdomain}.${Domain}' ]
@@ -75,15 +75,15 @@ Resources:
             - HasSubdomainRedirect
             - |-
               if (request.headers.host.value.toLowerCase() === redirectDomain) {
-                  return {
-                      statusCode: 301,
-                      statusDescription: 'Moved Permanently',
-                      headers: {
-                          location: {
-                              value: `https://${domain + uri}`,
-                          },
-                      },
-                  };
+                return {
+                  statusCode: 301,
+                  statusDescription: 'Moved Permanently',
+                  headers: {
+                    location: {
+                      value: `https://${domain + uri}`,
+                    },
+                  },
+                };
               }
             - ''
           UriTrailingSlash: !If
