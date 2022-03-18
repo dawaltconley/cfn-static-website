@@ -35,8 +35,13 @@ Resources:
     Properties:
       Name: !Sub '${AWS::StackName}-URLRedirects'
       AutoPublish: true
-      FunctionCode: !Sub 
-        - |
+      FunctionConfig:
+        Comment: !Sub
+          - URI redirection for ${FullDomain}
+          - FullDomain: !If [ IsApex, !Ref Domain, !Sub '${RedirectToSubdomain}.${Domain}' ]
+        Runtime: cloudfront-js-1.0
+      FunctionCode: !Sub
+        - |-
           var indexDocument = '${IndexDocument}';
           var domain = '${RedirectTo}'.toLowerCase();
           var redirectDomain = '${RedirectFrom}'.toLowerCase();
