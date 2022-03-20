@@ -25,13 +25,10 @@ Parameters:
     AllowedValues:
       - 'true'
       - 'false'
-  RedirectRules:
+  RedirectFunctionArn:
     Type: String
-    Default: PrettyUrls
-    AllowedValues:
-      - PrettyUrls
-      - WWWDomain
-      - WWWDomain_PrettyUrls
+    Description: ARN for CloudFront Function handling redirects.
+    Default: ''
   CloudFrontPriceClass:
     Type: String
     Description: Price class for CloudFront distribution.
@@ -88,6 +85,7 @@ Conditions:
   HasRedirectApexToSubDomain: !And
     - !Equals [!Ref RedirectApexToSubDomain, 'true']
     - !Condition HasSubdomain
+  HasRedirectFunction: !Not [!Equals [!Ref RedirectFunctionArn, '']]
 
 Resources:
 
@@ -166,9 +164,11 @@ Resources:
             - HEAD
             - OPTIONS
           Compress: true
-          FunctionAssociations:
+          FunctionAssociations: !If
+            - HasRedirectFunction
             - EventType: viewer-request
-              FunctionARN: !Sub 'arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:function/${RedirectRules}'
+              FunctionARN: !Ref RedirectFunctionArn
+            - !Ref AWS::NoValue
   OriginAccessIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
     Properties:
