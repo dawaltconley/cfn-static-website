@@ -19,7 +19,7 @@ Parameters:
     Default: 'www'
   # HostedZone: # use to conditionally create a hosted zone?
   #   Type: AWS::Route53::HostedZone::Id
-  RedirectApexToSubDomain:
+  RedirectApexToSubdomain:
     Type: String
     Default: 'true'
     AllowedValues:
@@ -83,7 +83,7 @@ Mappings:
 Conditions:
   HasSubdomain: !Not [!Equals [!Ref Subdomain, '']]
   HasRedirectApexToSubDomain: !And
-    - !Equals [!Ref RedirectApexToSubDomain, 'true']
+    - !Equals [!Ref RedirectApexToSubdomain, 'true']
     - !Condition HasSubdomain
   HasRedirectFunction: !Not [!Equals [!Ref RedirectFunctionArn, '']]
 
