@@ -120,7 +120,6 @@ Resources:
           - HasRedirectApexToSubDomain
           - Name: !Ref Domain
             Type: A
-            Condition: HasSubdomain
             AliasTarget:
               HostedZoneId: Z2FDTNDATAQYW2 # Magic CloudFront number
               DNSName: !GetAtt Distribution.DomainName
