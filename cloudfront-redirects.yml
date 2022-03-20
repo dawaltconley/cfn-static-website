@@ -2,9 +2,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Controls URL cleaning and subdomain redirection.
 
 Parameters:
-  Domain:
-    Type: String
-  RedirectToSubdomain:
+  Subdomain:
     Type: String
     Default: 'www'
   TrailingSlash:
@@ -16,11 +14,12 @@ Parameters:
     Default: 'index.html'
   UrlRedirectsStackName:
     Type: String
+    Description: 'Name of the stack exporting basic URL redirect functions: install from https://github.com/dawaltconley/cloudfront-redirects'
     Default: 'UrlRedirects'
 
 Conditions:
-  IsApex: !Equals [!Ref RedirectToSubdomain, '']
-  IsWWW: !Equals [!Ref RedirectToSubdomain, 'www']
+  IsApex: !Equals [!Ref Subdomain, '']
+  IsWWW: !Equals [!Ref Subdomain, 'www']
   HasTrailingSlash: !Equals [!Ref TrailingSlash, 'true']
   UsesApexDomainCleanUrls: !And [!Condition IsApex, !Condition HasTrailingSlash]
   UsesApexDomainCleanUrlsNoSlash: !And [!Condition IsApex, !Not [!Condition HasTrailingSlash]]
@@ -38,13 +37,11 @@ Resources:
       Name: !Sub '${AWS::StackName}-URLRedirects'
       AutoPublish: true
       FunctionConfig:
-        Comment: !Sub
-          - URI redirection for ${FullDomain}
-          - FullDomain: !If [ IsApex, !Ref Domain, !Sub '${RedirectToSubdomain}.${Domain}' ]
+        Comment: !Sub 'URI redirection for ${AWS::StackName}'
         Runtime: cloudfront-js-1.0
       FunctionCode: !Sub
         - |- 
-          var primarySubdomain = '${RedirectToSubdomain}';
+          var primarySubdomain = '${Subdomain}';
           var indexDocument = '${IndexDocument}';
 
           function redirect(uri) {
