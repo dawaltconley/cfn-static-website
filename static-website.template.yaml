@@ -15,10 +15,19 @@ Parameters:
     AllowedValues:
       - 'true'
       - 'false'
-  RedirectFunctionArn:
+  TrailingSlash:
     Type: String
-    Description: ARN for CloudFront Function handling redirects.
-    Default: ''
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+  IndexDocument:
+    Type: String
+    Default: 'index.html'
+  UrlRedirectsStackName:
+    Type: String
+    Description: >-
+      Name of the stack exporting basic URL redirect functions:
+      install from https://github.com/dawaltconley/cloudfront-redirects
+    Default: 'UrlRedirects'
   CloudFrontPriceClass:
     Type: String
     Description: Price class for CloudFront distribution.
@@ -83,7 +92,6 @@ Conditions:
   HasRedirectApexToSubDomain: !And
     - !Equals [!Ref RedirectApexToSubdomain, 'true']
     - !Condition HasSubdomain
-  HasRedirectFunction: !Not [!Equals [!Ref RedirectFunctionArn, '']]
   NeedsHostedZone: !Equals [!Ref HostedZoneId, '']
   NeedsCertificate: !Equals [!Ref ExistingCertificate, '']
   HasIamCertificate: !And
@@ -182,16 +190,23 @@ Resources:
             - HEAD
             - OPTIONS
           Compress: true
-          FunctionAssociations: !If
-            - HasRedirectFunction
-            - - EventType: viewer-request
-                FunctionARN: !Ref RedirectFunctionArn
-            - !Ref AWS::NoValue
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt RedirectFunction.Outputs.FunctionArn
   OriginAccessIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
     Properties:
       CloudFrontOriginAccessIdentityConfig:
         Comment: !If [HasSubdomain, !Sub '${Subdomain}.${Domain}', !Ref Domain]
+  RedirectFunction:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./cloudfront-redirects.template.yaml
+      Parameters:
+        Subdomain: !Ref Subdomain
+        TrailingSlash: !Ref TrailingSlash
+        IndexDocument: !Ref IndexDocument
+        UrlRedirectsStackName: !Ref UrlRedirectsStackName
 
   # S3
   SiteBucket:
