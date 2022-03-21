@@ -96,6 +96,8 @@ Resources:
   Certificate:
     Type: AWS::CertificateManager::Certificate
     Condition: NeedsCertificate
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       DomainName: !Ref Domain
       SubjectAlternativeNames:
@@ -109,6 +111,8 @@ Resources:
   HostedZone:
     Type: AWS::Route53::HostedZone
     Condition: NeedsHostedZone
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       Name: !Sub '${Domain}.'
   RecordSetGroup:
