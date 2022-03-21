@@ -14,17 +14,27 @@ Parameters:
     Default: 'index.html'
   UrlRedirectsStackName:
     Type: String
-    Description: 'Name of the stack exporting basic URL redirect functions: install from https://github.com/dawaltconley/cloudfront-redirects'
+    Description: >-
+      Name of the stack exporting basic URL redirect functions:
+      install from https://github.com/dawaltconley/cloudfront-redirects
     Default: 'UrlRedirects'
 
 Conditions:
   IsApex: !Equals [!Ref Subdomain, '']
   IsWWW: !Equals [!Ref Subdomain, 'www']
   HasTrailingSlash: !Equals [!Ref TrailingSlash, 'true']
-  UsesApexDomainCleanUrls: !And [!Condition IsApex, !Condition HasTrailingSlash]
-  UsesApexDomainCleanUrlsNoSlash: !And [!Condition IsApex, !Not [!Condition HasTrailingSlash]]
-  UsesWWWDomainCleanUrls: !And [!Condition IsWWW, !Condition HasTrailingSlash]
-  UsesWWWDomainCleanUrlsNoSlash: !And [!Condition IsWWW, !Not [!Condition HasTrailingSlash]]
+  UsesApexDomainCleanUrls: !And
+    - !Condition IsApex
+    - !Condition HasTrailingSlash
+  UsesApexDomainCleanUrlsNoSlash: !And
+    - !Condition IsApex
+    - !Not [!Condition HasTrailingSlash]
+  UsesWWWDomainCleanUrls: !And
+    - !Condition IsWWW
+    - !Condition HasTrailingSlash
+  UsesWWWDomainCleanUrlsNoSlash: !And
+    - !Condition IsWWW
+    - !Not [!Condition HasTrailingSlash]
   NeedsCustomFunction: !And
     - !Equals [!Ref IndexDocument, index.html]
     - !Not [!Or [!Condition IsApex, !Condition IsWWW]]
@@ -40,7 +50,7 @@ Resources:
         Comment: !Sub 'URI redirection for ${AWS::StackName}'
         Runtime: cloudfront-js-1.0
       FunctionCode: !Sub
-        - |- 
+        - |-
           var primarySubdomain = '${Subdomain}';
           var indexDocument = '${IndexDocument}';
 
@@ -86,7 +96,7 @@ Resources:
             - |-
               var newUri = uri.slice(0, -indexDocument.length${SliceMod});
               return redirect(newUri);
-            - SliceMod: !If [ HasTrailingSlash, '', ' - 1' ]
+            - SliceMod: !If [HasTrailingSlash, '', ' - 1']
           UriNoTrailingSlash: !If
             - HasTrailingSlash
             - |-
