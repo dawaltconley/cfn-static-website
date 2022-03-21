@@ -3,12 +3,21 @@ Description: >-
   Deployment stage for a website using Netlify CMS.
 
 Parameters:
-  FullDomain:
+  DomainStack:
     Type: String
-  ClientId:
-    Type: AWS::SSM::Parameter::Value<String>
-  ClientSecret:
-    Type: AWS::SSM::Parameter::Value<String>
+    Description: Name of the stack that exports domain and certificate information.
+  ApiSubdomain:
+    Type: String
+    Default: api
+  ApiBasePath:
+    Type: String
+    Default: admin
+
+  # Stack Variables
+  ClientAuth:
+    Type: AWS::SSM::Parameter::Value<List<String>>
+    Description: A SSM StringList Parameter, where the first parameter corresponds to the Client ID and the second to the Client Secret used for authorizing with GitHub.
+    NoEcho: true
   GitHostname:
     Type: String
     Default: https://github.com
@@ -24,6 +33,8 @@ Parameters:
   OAuthTokenPath:
     Type: String
     Default: /login/oauth/access_token
+
+  # Netlify stack config
   NetlifyStackName:
     Type: String
     Description: Name of the stack exporting a Rest API ID for a self-hosted Netlify CMS.
@@ -41,19 +52,26 @@ Resources:
         ThrottlingBurstLimit: 50
         LoggingLevel: ERROR
         Variables:
-          CLIENT_ID: !Ref ClientId
-          CLIENT_SECRET: !Ref ClientSecret
-          DOMAIN: !Ref FullDomain
+          CLIENT_ID: !Select [0, !Ref ClientAuth]
+          CLIENT_SECRET: !Select [1, !Ref ClientAuth]
+          DOMAIN: !Sub
+            - 'https://${Domain}'
+            - Domain:
+                Fn::ImportValue: !Sub '${DomainStack}-FullDomain'
           GIT_HOSTNAME: !Ref GitHostname
           OAUTH_AUTHORIZE_PATH: !Ref OAuthAuthorizePath
           OAUTH_PROVIDER: !Ref OAuthProvider
           OAUTH_SCOPES: !Ref OAuthScopes
           OAUTH_TOKEN_PATH: !Ref OAuthTokenPath
-  DomainName:
+  DomainName: # TODO conditionally create if none provided
     Type: AWS::ApiGateway::DomainName
     Properties:
-      CertificateArn: arn:aws:acm:us-east-1:694316186841:certificate/b45b3e52-a6bb-4dec-9dc2-994ad5fc7b78 # TODO import
-      DomainName: api.seniorinfluence.com # TODO make variable
+      CertificateArn:
+        Fn::ImportValue: !Sub '${DomainStack}-CertificateArn'
+      DomainName: !Sub
+        - '${ApiSubdomain}.${Domain}'
+        - Domain:
+            Fn::ImportValue: !Sub '${DomainStack}-Domain'
       EndpointConfiguration:
         - EDGE
       SecurityPolicy: TLS_1_2
@@ -64,4 +82,35 @@ Resources:
         Fn::ImportValue: !Sub '${NetlifyStackName}-RestApiId'
       DomainName: !Ref DomainName
       Stage: !Ref AWS::StackName
-      BasePath: admin
+      BasePath: !Ref ApiBasePath
+  # could also keep this in the parent group, point record sets to the outputs of other stacks.
+  RecordSetGroup: # TODO conditionally create if none provided?
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneName: !Sub
+        - '${Domain}.'
+        - Domain:
+            Fn::ImportValue: !Sub '${DomainStack}-Domain'
+      RecordSets:
+        - Name: !Sub
+            - '${ApiSubdomain}.${Domain}'
+            - Domain:
+                Fn::ImportValue: !Sub '${DomainStack}-Domain'
+          Type: A
+          AliasTarget:
+            HostedZoneId: !GetAtt DomainName.DistributionHostedZoneId
+            DNSName: !GetAtt DomainName.DistributionDomainName
+
+Outputs:
+  DeploymentId:
+    Value: !Ref Deployment # only value exported from api deployment
+  DeploymentPath:
+    Value: !Ref ApiBasePath
+  DeploymentStageName:
+    Value: !Ref AWS::StackName
+  ApiDomainName:
+    Value: !Ref DomainName
+  DistributionHostedZone:
+    Value: !GetAtt DomainName.DistributionHostedZoneId
+  DistributionDomainName:
+    Value: !GetAtt DomainName.DistributionDomainName
