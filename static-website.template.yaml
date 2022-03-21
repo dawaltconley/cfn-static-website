@@ -1,14 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: A template for launching static sites on AWS.
 
-# Supported scenarios:
-# - new static site as primary content for a new domain, with optional primary subdomain
-#   needs: HostedZone, RecordSetGroup (1-2 Records), Certificate,
-# - new static site as primary content for an existing domain / pre-existing Route53 Hosted Zone
-#   needs: RecordSetGroup (1-2 Records), Certificate?
-# - new static site for subdomain on a pre-existing Route53 Hosted Zone
-#   needs: RecordSet (1 Record)
-
 Parameters:
   Domain:
     Type: String
@@ -17,8 +9,6 @@ Parameters:
     Type: String
     Description: Primary subdomain to associate with the website.
     Default: www
-  # HostedZone:  # use to conditionally create a hosted zone?
-  #   Type: AWS::Route53::HostedZone::Id
   RedirectApexToSubdomain:
     Type: String
     Default: 'true'
@@ -56,23 +46,28 @@ Parameters:
       - CachingOptimized
       - CachingOptimizedForUncompressedObjects
       - CachingDisabled
+  HostedZoneId:
+    Type: String
+    Default: ''
+  ExistingCertificate:
+    Type: String
+    Description: Represents an existing certificate.
+    Default: ''
+  ExistingCertificateType:
+    Type: String
+    Description: >-
+      Indicates whether to use the certificate from the AWS Certificate
+      Manager or AWS Identity and Access Management.
+    Default: AcmCertificateArn
+    AllowedValues:
+    - AcmCertificateArn
+    - IamCertificateId
   # Customer:
   #   Type: String
   #   Description: The customer name, used for tagging.
   # Access:
   #   Type: String
   #   Description: Name of the access group, used for tagging.
-  # CertificateType:
-  #   Description: >-
-  #     Indicates whether to use the certificate from the AWS Certificate
-  #     Manager or AWS Identity and Access Management. CreateAcmCertificate
-  #     only works in the us-east-1 region!
-  #   Type: String
-  #   Default: IamCertificateId
-  #   AllowedValues:
-  #   - AcmCertificateArn
-  #   - IamCertificateId
-  #   - CreateAcmCertificate
 
 Mappings:
   ManagedCachePolicies:
@@ -89,12 +84,18 @@ Conditions:
     - !Equals [!Ref RedirectApexToSubdomain, 'true']
     - !Condition HasSubdomain
   HasRedirectFunction: !Not [!Equals [!Ref RedirectFunctionArn, '']]
+  NeedsHostedZone: !Equals [!Ref HostedZoneId, '']
+  NeedsCertificate: !Equals [!Ref ExistingCertificate, '']
+  HasIamCertificate: !And
+    - !Not [!Condition NeedsCertificate]
+    - !Equals [!Ref ExistingCertificateType, IamCertificateId]
 
 Resources:
 
   # ACM
-  Certificate:  # TODO conditionally create and allow other cert types?
+  Certificate:
     Type: AWS::CertificateManager::Certificate
+    Condition: NeedsCertificate
     Properties:
       DomainName: !Ref Domain
       SubjectAlternativeNames:
@@ -102,11 +103,12 @@ Resources:
       ValidationMethod: DNS
       DomainValidationOptions:
         - DomainName: !Ref Domain
-          HostedZoneId: !Ref HostedZone
+          HostedZoneId: !If [NeedsHostedZone, !Ref HostedZone, !Ref HostedZoneId]
 
   # Route53
-  HostedZone:  # TODO conditionally create...or create outside of stack
+  HostedZone:
     Type: AWS::Route53::HostedZone
+    Condition: NeedsHostedZone
     Properties:
       Name: !Sub '${Domain}.'
   RecordSetGroup:
@@ -150,7 +152,14 @@ Resources:
         IPV6Enabled: true
         PriceClass: !Ref CloudFrontPriceClass
         ViewerCertificate:
-          AcmCertificateArn: !Ref Certificate
+          AcmCertificateArn: !If
+            - NeedsCertificate
+            - !Ref Certificate
+            - !If [HasIamCertificate, !Ref AWS::NoValue, !Ref ExistingCertificate]
+          IamCertificateId: !If
+            - HasIamCertificate
+            - !Ref ExistingCertificate
+            - !Ref AWS::NoValue
           MinimumProtocolVersion: !Ref CloudFrontSecurityPolicy
           SslSupportMethod: sni-only
         DefaultCacheBehavior:
@@ -219,12 +228,13 @@ Outputs:
   DistributionDomainName:
     Value: !GetAtt Distribution.DomainName
   CertificateArn:
-    Value: !Ref Certificate
+    Value: !If [NeedsCertificate, !Ref Certificate, !Ref ExistingCertificate]
     Export:
       Name: !Sub '${AWS::StackName}-CertificateArn'
   CertificateType:
-    Value: ACM
+    Value: !If [NeedsCertificate, AcmCertificateArn, !Ref ExistingCertificateType]
   HostedZoneId:
-    Value: !Ref HostedZone
+    Value: !If [NeedsHostedZone, !Ref HostedZone, !Ref HostedZoneId]
   NameServers:
+    Condition: NeedsHostedZone
     Value: !Join [\n, !GetAtt HostedZone.NameServers]
