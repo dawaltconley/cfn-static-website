@@ -256,4 +256,4 @@ Outputs:
     Value: !If [NeedsHostedZone, !Ref HostedZone, !Ref HostedZoneId]
   NameServers:
     Condition: NeedsHostedZone
-    Value: !Join [\n, !GetAtt HostedZone.NameServers]
+    Value: !Join [' ', !GetAtt HostedZone.NameServers]
