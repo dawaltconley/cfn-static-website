@@ -15,8 +15,10 @@ Parameters:
 
   # Stack Variables
   ClientAuth:
-    Type: AWS::SSM::Parameter::Value<List<String>>
-    Description: A SSM StringList Parameter, where the first parameter corresponds to the Client ID and the second to the Client Secret used for authorizing with GitHub.
+    Type: 'AWS::SSM::Parameter::Value<List<String>>'
+    Description: >-
+      A SSM StringList Parameter, where the first parameter corresponds to the Client ID
+      and the second to the Client Secret used for authorizing with GitHub.
     NoEcho: true
   GitHostname:
     Type: String
@@ -73,7 +75,8 @@ Resources:
         - Domain:
             Fn::ImportValue: !Sub '${DomainStack}-Domain'
       EndpointConfiguration:
-        - EDGE
+        Types:
+          - EDGE
       SecurityPolicy: TLS_1_2
   BasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
