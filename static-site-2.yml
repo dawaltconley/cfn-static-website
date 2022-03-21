@@ -190,3 +190,35 @@ Resources:
             Resource: !Sub '${SiteBucket.Arn}/*'
             Principal:
               CanonicalUser: !GetAtt OriginAccessIdentity.S3CanonicalUserId
+
+Outputs:
+  StackName:
+    Value: !Ref AWS::StackName
+  ApexDomain:
+    Value: !Ref Domain
+    Export:
+      Name: !Sub '${AWS::StackName}-Domain'
+  PrimarySubdomain:
+    Value: !Ref Subdomain
+    Export:
+      Name: !Sub '${AWS::StackName}-Subdomain'
+  FullDomain:
+    Value: !If [ HasSubdomain, !Sub '${Subdomain}.${Domain}', !Ref Domain ]
+    Export:
+      Name: !Sub '${AWS::StackName}-FullDomain'
+  SiteBucket:
+    Value: !Ref SiteBucket
+  SiteBucketArn:
+    Value: !GetAtt SiteBucket.Arn
+  DistributionDomainName:
+    Value: !GetAtt Distribution.DomainName
+  CertificateArn:
+    Value: !Ref Certificate
+    Export:
+      Name: !Sub '${AWS::StackName}-CertificateArn'
+  CertificateType:
+    Value: ACM
+  HostedZoneId:
+    Value: !Ref HostedZone
+  NameServers:
+    Value: !Join ['\n', !GetAtt HostedZone.NameServers]
