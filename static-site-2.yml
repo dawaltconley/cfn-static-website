@@ -90,7 +90,7 @@ Conditions:
 Resources:
 
   # ACM
-  Certificate:
+  Certificate: # TODO conditionally create and allow other cert types?
     Type: AWS::CertificateManager::Certificate
     Properties:
       DomainName: !Ref Domain
@@ -102,7 +102,7 @@ Resources:
           HostedZoneId: !Ref HostedZone
 
   # Route53
-  HostedZone:
+  HostedZone: # TODO conditionally create...or create outside of stack
     Type: AWS::Route53::HostedZone
     Properties:
       Name: !Sub '${Domain}.'
