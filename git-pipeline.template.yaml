@@ -16,9 +16,9 @@ Parameters:
     Type: String
     Default: GITHUB
     AllowedValues:
-      - BITBUCKET
-      - CODECOMMIT
-      - CODEPIPELINE
+      # - BITBUCKET
+      # - CODECOMMIT
+      # - CODEPIPELINE
       - GITHUB
       - GITHUB_ENTERPRISE
       # - NO_SOURCE
@@ -61,12 +61,17 @@ Parameters:
       - NO_CACHE
       - S3
       - LOCAL
+  SourceCredentials:
+    Type: String
+    Description: Personal Access Token, or ARN of CodeBuild Source Credential.
+    Default: ''
 
 Conditions:
   UsesArtifacts: !Equals [!Ref UseBuildArtifacts, 'true']
   DefaultBuildSpec: !Equals [!Ref BuildSpec, buildspec.yml]
   HasCache: !Not [!Equals [!Ref CacheType, NO_CACHE]]
   S3Cache: !Equals [!Ref CacheType, S3]
+  HasSourceCredentials: !Not [!Equals [!Ref SourceCredentials, '']]
 
 Resources:
   Build:
@@ -77,6 +82,13 @@ Resources:
         Location: !Ref SourceLocation
         BuildSpec: !If [DefaultBuildSpec, !Ref AWS::NoValue, !Ref BuildSpec]
         GitCloneDepth: 1
+        Auth:
+          Type: OAUTH
+          Resource: !If  # if none provided, guess location for console-generated token
+            - HasSourceCredentials
+            - !Ref SourceCredentials
+            - !Sub 'arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:token/github'
+              # TODO: arns for other service tokens?
       SourceVersion: !Ref SourceBranch
       ServiceRole: !GetAtt ServiceRole.Arn
       Triggers:
