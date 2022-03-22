@@ -1,3 +1,5 @@
+# Depends on  https://github.com/dawaltconley/cloudfront-redirects
+
 AWSTemplateFormatVersion: 2010-09-09
 Description: Controls URL cleaning and subdomain redirection.
 
