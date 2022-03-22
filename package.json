@@ -1,0 +1,27 @@
+{
+  "name": "@dawaltconley/cfn-static-website",
+  "version": "1.0.0",
+  "description": "Modular cloudformation stacks for an AWS static website.",
+  "main": "static-website.template.yaml",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dawaltconley/cfn-static-website.git"
+  },
+  "keywords": [
+    "cloudformation",
+    "aws",
+    "static",
+    "website",
+    "netlify",
+    "cms"
+  ],
+  "author": "Dylan Awalt-Conley",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dawaltconley/cloudformation/issues"
+  },
+  "homepage": "https://github.com/dawaltconley/cloudformation#readme"
+}
