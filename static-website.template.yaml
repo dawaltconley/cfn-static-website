@@ -71,12 +71,6 @@ Parameters:
     AllowedValues:
     - AcmCertificateArn
     - IamCertificateId
-  # Customer:
-  #   Type: String
-  #   Description: The customer name, used for tagging.
-  # Access:
-  #   Type: String
-  #   Description: Name of the access group, used for tagging.
 
 Mappings:
   ManagedCachePolicies:
