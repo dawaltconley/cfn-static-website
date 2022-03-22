@@ -170,3 +170,13 @@ Resources:
                   - 'logs:CreateLogGroup'
                   - 'logs:CreateLogStream'
                   - 'logs:PutLogEvents'
+              - !If
+                - S3Cache
+                - Effect: Allow
+                  Resource:
+                    - !GetAtt CacheBucket.Arn
+                    - !Sub '${CacheBucket.Arn}/*'
+                  Action:
+                    - 's3:PutObject'
+                    - 's3:Get*'
+                - !Ref AWS::NoValue
