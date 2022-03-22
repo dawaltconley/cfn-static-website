@@ -212,6 +212,7 @@ Resources:
   SiteBucket:
     Type: AWS::S3::Bucket
     Properties:
+      # BucketName is not required, could be zero properties
       BucketName: !If [HasSubdomain, !Sub '${Subdomain}.${Domain}', !Ref Domain]
   SiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
