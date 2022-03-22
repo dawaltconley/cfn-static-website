@@ -1,0 +1,160 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates a CodeBuild environment for automatically deploying a static website.
+
+Parameters:
+  SiteBucket:
+    Type: String
+    Description: Name of the bucket hosting the static website resources.
+  SourceLocation:
+    Type: String
+    Description: Source code location. For GitHub, the GitHub repository's clone URL.
+  SourceBranch:
+    Type: String
+    Description: Branch of the git source to pull from.
+    Default: main
+  SourceType:
+    Type: String
+    Default: GITHUB
+    AllowedValues:
+      - BITBUCKET
+      - CODECOMMIT
+      - CODEPIPELINE
+      - GITHUB
+      - GITHUB_ENTERPRISE
+      # - NO_SOURCE
+      # - S3
+  BuildSpec:
+    Type: String
+    Description: Name of the buildspec file.
+    Default: buildspec.yml
+  EnvironmentType:
+    Type: String
+    Default: LINUX_CONTAINER
+    AllowedValues:
+      - ARM_CONTAINER
+      - LINUX_CONTAINER
+      - LINUX_GPU_CONTAINER
+      - WINDOWS_CONTAINER
+      - WINDOWS_SERVER_2019_CONTAINER
+  EnvironmentImage:
+    Type: String
+    Default: aws/codebuild/standard:5.0
+  EnvironmentComputeType:
+    Type: String
+    Default: BUILD_GENERAL1_SMALL
+    AllowedValues:
+      - BUILD_GENERAL1_SMALL
+      - BUILD_GENERAL1_MEDIUM
+      - BUILD_GENERAL1_LARGE
+  UseBuildArtifacts:
+    Type: String
+    Description: >-
+      Whether to upload the generated files using build artifacts, or manually.
+    Default: 'true'
+    AllowedValues:
+      - 'true'
+      - 'false'
+  CacheType:
+    Type: String
+    Default: NO_CACHE
+    AllowedValues:
+      - NO_CACHE
+      - S3
+      - LOCAL
+
+Conditions:
+  UsesArtifacts: !Equals [!Ref UseBuildArtifacts, 'true']
+  DefaultBuildSpec: !Equals [!Ref BuildSpec, buildspec.yml]
+  HasCache: !Not [!Equals [!Ref CacheType, NO_CACHE]]
+  S3Cache: !Equals [!Ref CacheType, S3]
+
+Resources:
+  Build:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Source: 
+        Type: !Ref SourceType
+        Location: !Ref SourceLocation
+        BuildSpec: !If [DefaultBuildSpec, !Ref AWS::NoValue, !Ref BuildSpec]
+        GitCloneDepth: 1
+      SourceVersion: !Ref SourceBranch
+      ServiceRole: !GetAtt ServiceRole.Arn
+      Triggers:
+        Webhook: true
+        BuildType: BUILD
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+              ExcludeMatchedPattern: false
+            - Type: HEAD_REF
+              Pattern: !Sub '^refs/heads/${SourceBranch}$'
+              ExcludeMatchedPattern: false
+      Environment:
+        Type: !Ref EnvironmentType
+        Image: !Ref EnvironmentImage
+        ComputeType: !Ref EnvironmentComputeType
+      Artifacts: !If
+        - UsesArtifacts
+        - Type: S3
+          Location: !Ref SiteBucket
+          Name: /
+          EncryptionDisabled: true
+        - Type: NO_ARTIFACTS
+      Cache: !If
+        - HasCache
+        - !If
+          - S3Cache
+          - Type: S3
+            Location: !Ref CacheBucket
+          - Type: LOCAL
+            Modes:
+              - LOCAL_CUSTOM_CACHE
+        - !Ref AWS::NoValue
+      LogsConfig:
+        CloudWatchLogs:
+          GroupName: !Ref LogGroup
+          Status: ENABLED
+  CacheBucket:
+    Type: AWS::S3::Bucket
+    Condition: S3Cache
+  # CacheBucketPolicy:
+  #   Type: AWS::S3::BucketPolicy
+  #   Condition: S3Cache
+  #   Properties:
+  #     Bucket: !Ref CacheBucket
+  #     PolicyDocument:
+  #       Statement:
+  #         - Action: s3
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+  ServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub '${AWS::StackName}S3Policy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:s3:::${SiteBucket}'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${SiteBucket}/*'
+                Action:
+                  - 's3:PutObject'
+                  - 's3:Get*'
+                  - 's3:List*'
+              - Effect: Allow
+                Resource:
+                  - !GetAtt LogGroup.Arn
+                  - !Sub '${LogGroup.Arn}:*'
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
