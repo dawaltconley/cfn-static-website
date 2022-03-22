@@ -3,17 +3,12 @@ Description: >-
   Deployment stage for a website using Netlify CMS.
 
 Parameters:
-  Domain:
+  FullDomain:
     Type: String
-    Description: Domain of website using Netlify CMS.
   ClientId:
-    Type: String
-    Description: Client ID for Netlify CMS authentication.
-    NoEcho: true
+    Type: AWS::SSM::Parameter::Value<String>
   ClientSecret:
-    Type: String
-    Description: Client secret for Netlify CMS authentication.
-    NoEcho: true
+    Type: AWS::SSM::Parameter::Value<String>
   GitHostname:
     Type: String
     Default: https://github.com
@@ -29,8 +24,9 @@ Parameters:
   OAuthTokenPath:
     Type: String
     Default: /login/oauth/access_token
-  NetlifyCMSStackName:
+  NetlifyStackName:
     Type: String
+    Description: Name of the stack exporting a Rest API ID for a self-hosted Netlify CMS.
     Default: NetlifyCMSAuth
 
 Resources:
@@ -38,35 +34,34 @@ Resources:
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId:
-        Fn::ImportValue: !Sub '${NetlifyCMSStackName}-RestApiId'
-      StageName: TestStage
+        Fn::ImportValue: !Sub '${NetlifyStackName}-RestApiId'
+      StageName: !Ref AWS::StackName
       StageDescription:
         ThrottlingRateLimit: 100
         ThrottlingBurstLimit: 50
+        LoggingLevel: ERROR
         Variables:
           CLIENT_ID: !Ref ClientId
           CLIENT_SECRET: !Ref ClientSecret
-          DOMAIN: !Ref Domain
+          DOMAIN: !Ref FullDomain
           GIT_HOSTNAME: !Ref GitHostname
           OAUTH_AUTHORIZE_PATH: !Ref OAuthAuthorizePath
           OAUTH_PROVIDER: !Ref OAuthProvider
           OAUTH_SCOPES: !Ref OAuthScopes
           OAUTH_TOKEN_PATH: !Ref OAuthTokenPath
-
-  # CustomDomain:
-  #   Type: AWS::ApiGateway::DomainName
-  #   Properties:
-  #     CertificateArn: arn:aws:acm:us-east-1:694316186841:certificate/b45b3e52-a6bb-4dec-9dc2-994ad5fc7b78
-  #     DomainName: api.seniorinfluence.com
-  #     SecurityPolicy: TLS_1_2
-  #     EndpointConfiguration:
-  #       - EDGE
-  #
-  # PathMapping:
-  #   Type: AWS::ApiGateway::BasePathMapping
-  #   Properties:
-  #     RestApiId:
-  #       Fn::ImportValue: !Sub '${NetlifyCMSStackName}-RestApiId'
-  #     DomainName: !Ref CustomDomain
-  #     Stage: TestStage # Better way to do this?
-  #     BasePath: admin
+  DomainName:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      CertificateArn: arn:aws:acm:us-east-1:694316186841:certificate/b45b3e52-a6bb-4dec-9dc2-994ad5fc7b78 # TODO import
+      DomainName: api.seniorinfluence.com # TODO make variable
+      EndpointConfiguration:
+        - EDGE
+      SecurityPolicy: TLS_1_2
+  BasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      RestApiId:
+        Fn::ImportValue: !Sub '${NetlifyStackName}-RestApiId'
+      DomainName: !Ref DomainName
+      Stage: !Ref AWS::StackName
+      BasePath: admin
