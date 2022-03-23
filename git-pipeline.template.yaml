@@ -129,14 +129,6 @@ Resources:
   CacheBucket:
     Type: AWS::S3::Bucket
     Condition: S3Cache
-  # CacheBucketPolicy:
-  #   Type: AWS::S3::BucketPolicy
-  #   Condition: S3Cache
-  #   Properties:
-  #     Bucket: !Ref CacheBucket
-  #     PolicyDocument:
-  #       Statement:
-  #         - Action: s3
   LogGroup:
     Type: AWS::Logs::LogGroup
   ServiceRole:
