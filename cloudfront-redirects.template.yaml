@@ -84,12 +84,18 @@ Resources:
               if (!request.uri.includes('.')) {
                 ${UriNoTrailingSlash}
               }
+              if (uri !== request.uri) {
+                return redirect(uri);
+              }
 
               return request;
           }
         - UriTrailingSlash: !If
             - HasTrailingSlash
             - |-
+              if (uri !== request.uri) {
+                return redirect(uri);
+              }
               request.uri += indexDocument;
               return request;
             - |-
@@ -104,6 +110,9 @@ Resources:
             - |-
               return redirect(uri + '/');
             - |-
+              if (uri !== request.uri) {
+                return redirect(uri);
+              }
               request.uri += '/' + indexDocument;
               return request;
 
