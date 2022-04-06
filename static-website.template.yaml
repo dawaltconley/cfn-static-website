@@ -235,16 +235,10 @@ Outputs:
     Value: !Ref AWS::StackName
   ApexDomain:
     Value: !Ref Domain
-    Export:
-      Name: !Sub '${AWS::StackName}-Domain'
   PrimarySubdomain:
     Value: !Ref Subdomain
-    Export:
-      Name: !Sub '${AWS::StackName}-Subdomain'
   FullDomain:
     Value: !If [HasSubdomain, !Sub '${Subdomain}.${Domain}', !Ref Domain]
-    Export:
-      Name: !Sub '${AWS::StackName}-FullDomain'
   SiteBucket:
     Value: !Ref SiteBucket
   SiteBucketArn:
@@ -253,8 +247,6 @@ Outputs:
     Value: !GetAtt Distribution.DomainName
   CertificateArn:
     Value: !If [NeedsCertificate, !Ref Certificate, !Ref ExistingCertificate]
-    Export:
-      Name: !Sub '${AWS::StackName}-CertificateArn'
   CertificateType:
     Value: !If [NeedsCertificate, AcmCertificateArn, !Ref ExistingCertificateType]
   HostedZoneId:

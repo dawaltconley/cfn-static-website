@@ -5,15 +5,21 @@ Description: >-
   Deployment stage for a website using Netlify CMS.
 
 Parameters:
-  DomainStack:
+  HostDomain:
     Type: String
-    Description: Name of the stack that exports domain and certificate information.
+    Description: Full domain name (including protocol) where Netlify CMS will be used.
+  ApiDomain:
+    Type: String
+    Default: ''
   ApiSubdomain:
     Type: String
     Default: api
   ApiBasePath:
     Type: String
     Default: admin
+  CertificateArn:
+    Type: String
+    Default: ''
 
   # Stack Variables
   ClientAuth:
@@ -44,6 +50,14 @@ Parameters:
     Description: Name of the stack exporting a Rest API ID for a self-hosted Netlify CMS.
     Default: NetlifyCMSAuth
 
+Conditions:
+  HasApiDomain: !Not [!Equals [!Ref ApiDomain, '']]
+  HasApiSubdomain: !Not [!Equals [!Ref ApiSubdomain, '']]
+  HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
+  HasCustomApiDomain: !And
+    - !Condition HasApiDomain
+    - !Condition HasCertificate
+
 Resources:
   Deployment:
     Type: AWS::ApiGateway::Deployment
@@ -58,10 +72,7 @@ Resources:
         Variables:
           CLIENT_ID: !Select [0, !Ref ClientAuth]
           CLIENT_SECRET: !Select [1, !Ref ClientAuth]
-          DOMAIN: !Sub
-            - 'https://${Domain}'
-            - Domain:
-                Fn::ImportValue: !Sub '${DomainStack}-FullDomain'
+          DOMAIN: !Ref HostDomain
           GIT_HOSTNAME: !Ref GitHostname
           OAUTH_AUTHORIZE_PATH: !Ref OAuthAuthorizePath
           OAUTH_PROVIDER: !Ref OAuthProvider
@@ -69,38 +80,30 @@ Resources:
           OAUTH_TOKEN_PATH: !Ref OAuthTokenPath
   DomainName: # TODO conditionally create if none provided
     Type: AWS::ApiGateway::DomainName
+    Condition: HasCustomApiDomain
     Properties:
-      CertificateArn:
-        Fn::ImportValue: !Sub '${DomainStack}-CertificateArn'
-      DomainName: !Sub
-        - '${ApiSubdomain}.${Domain}'
-        - Domain:
-            Fn::ImportValue: !Sub '${DomainStack}-Domain'
+      CertificateArn: !Ref CertificateArn
+      DomainName: !If [HasApiSubdomain, !Sub '${ApiSubdomain}.{ApiDomain}', !Ref ApiDomain]
       EndpointConfiguration:
         Types:
           - EDGE
       SecurityPolicy: TLS_1_2
   BasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
+    Condition: HasCustomApiDomain
     Properties:
       RestApiId:
         Fn::ImportValue: !Sub '${NetlifyStackName}-RestApiId'
       DomainName: !Ref DomainName
       Stage: !Ref AWS::StackName
       BasePath: !Ref ApiBasePath
-  # could also keep this in the parent group, point record sets to the outputs of other stacks.
-  RecordSetGroup: # TODO conditionally create if none provided?
+  RecordSetGroup:
     Type: AWS::Route53::RecordSetGroup
+    Condition: HasCustomApiDomain
     Properties:
-      HostedZoneName: !Sub
-        - '${Domain}.'
-        - Domain:
-            Fn::ImportValue: !Sub '${DomainStack}-Domain'
+      HostedZoneName: !Sub '${ApiDomain}.'
       RecordSets:
-        - Name: !Sub
-            - '${ApiSubdomain}.${Domain}'
-            - Domain:
-                Fn::ImportValue: !Sub '${DomainStack}-Domain'
+        - Name: !If [HasApiSubdomain, !Sub '${ApiSubdomain}.{ApiDomain}', !Ref ApiDomain]
           Type: A
           AliasTarget:
             HostedZoneId: !GetAtt DomainName.DistributionHostedZoneId
@@ -109,13 +112,17 @@ Resources:
 Outputs:
   DeploymentId:
     Value: !Ref Deployment # only value exported from api deployment
-  DeploymentPath:
-    Value: !Ref ApiBasePath
   DeploymentStageName:
     Value: !Ref AWS::StackName
+  DeploymentPath:
+    Condition: HasCustomApiDomain
+    Value: !Ref ApiBasePath
   ApiDomainName:
+    Condition: HasCustomApiDomain
     Value: !Ref DomainName
   DistributionHostedZone:
+    Condition: HasCustomApiDomain
     Value: !GetAtt DomainName.DistributionHostedZoneId
   DistributionDomainName:
+    Condition: HasCustomApiDomain
     Value: !GetAtt DomainName.DistributionDomainName
