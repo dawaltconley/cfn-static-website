@@ -7,7 +7,7 @@ Parameters:
     Description: Base domain name for the static website.
   Subdomain:
     Type: String
-    Description: Primary subdomain to associate with the website.
+    Description: Primary subdomain to associate with the website. Pass an empty string for apex domains.
     Default: www
   Redirect:
     Type: String
