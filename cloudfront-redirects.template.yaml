@@ -37,8 +37,8 @@ Conditions:
   UsesWWWDomainCleanUrlsNoSlash: !And
     - !Condition IsWWW
     - !Not [!Condition HasTrailingSlash]
-  NeedsCustomFunction: !And
-    - !Equals [!Ref IndexDocument, index.html]
+  NeedsCustomFunction: !Or
+    - !Not [!Equals [!Ref IndexDocument, 'index.html']]
     - !Not [!Or [!Condition IsApex, !Condition IsWWW]]
 
 Resources:
