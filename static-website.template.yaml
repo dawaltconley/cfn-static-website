@@ -62,14 +62,16 @@ Parameters:
       - CachingOptimized
       - CachingOptimizedForUncompressedObjects
       - CachingDisabled
-  HostedZoneId:
+  Route53Dns:
     Type: String
-    Default: ''
-  ExistingCertificate:
+    Description: Whether this domain uses Route53 for its DNS
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+  CertificateArn:
     Type: String
     Description: Represents an existing certificate.
     Default: ''
-  ExistingCertificateType:
+  CertificateType:
     Type: String
     Description: >-
       Indicates whether to use the certificate from the AWS Certificate
@@ -93,40 +95,22 @@ Conditions:
   HasRedirectApexToSubDomain: !And
     - !Equals [!Ref RedirectApexToSubdomain, 'true']
     - !Condition HasSubdomain
-  NeedsHostedZone: !Equals [!Ref HostedZoneId, '']
-  NeedsCertificate: !Equals [!Ref ExistingCertificate, '']
+  CreateRecordSetGroup: !Equals [!Ref Route53Dns, 'true']
+  HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
+  HasAcmCertificate: !And
+    - !Condition HasCertificate
+    - !Equals [!Ref CertificateType, AcmCertificateArn]
   HasIamCertificate: !And
-    - !Not [!Condition NeedsCertificate]
-    - !Equals [!Ref ExistingCertificateType, IamCertificateId]
+    - !Condition HasCertificate
+    - !Equals [!Ref CertificateType, IamCertificateId]
   HasCloudfrontAliases: !Not [!Equals [!Join ['', !Ref CloudFrontAliases], '']]
 
 Resources:
 
-  # ACM
-  Certificate:
-    Type: AWS::CertificateManager::Certificate
-    Condition: NeedsCertificate
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      DomainName: !Ref Domain
-      SubjectAlternativeNames:
-        - !Sub '*.${Domain}'
-      ValidationMethod: DNS
-      DomainValidationOptions:
-        - DomainName: !Ref Domain
-          HostedZoneId: !If [NeedsHostedZone, !Ref HostedZone, !Ref HostedZoneId]
-
   # Route53
-  HostedZone:
-    Type: AWS::Route53::HostedZone
-    Condition: NeedsHostedZone
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      Name: !Sub '${Domain}.'
   RecordSetGroup:
     Type: AWS::Route53::RecordSetGroup
+    Condition: CreateRecordSetGroup
     Properties:
       HostedZoneName: !Sub '${Domain}.'
       RecordSets:
@@ -167,17 +151,19 @@ Resources:
         HttpVersion: http2
         IPV6Enabled: true
         PriceClass: !Ref CloudFrontPriceClass
-        ViewerCertificate:
-          AcmCertificateArn: !If
-            - NeedsCertificate
-            - !Ref Certificate
-            - !If [HasIamCertificate, !Ref AWS::NoValue, !Ref ExistingCertificate]
-          IamCertificateId: !If
-            - HasIamCertificate
-            - !Ref ExistingCertificate
-            - !Ref AWS::NoValue
-          MinimumProtocolVersion: !Ref CloudFrontSecurityPolicy
-          SslSupportMethod: sni-only
+        ViewerCertificate: !If
+          - HasCertificate
+          - AcmCertificateArn: !If
+              - HasAcmCertificate
+              - !Ref CertificateArn
+              - !Ref AWS::NoValue
+            IamCertificateId: !If
+              - HasIamCertificate
+              - !Ref CertificateArn
+              - !Ref AWS::NoValue
+            MinimumProtocolVersion: !Ref CloudFrontSecurityPolicy
+            SslSupportMethod: sni-only
+          - !Ref AWS::NoValue
         DefaultCacheBehavior:
           TargetOriginId: s3origin
           CachePolicyId: !FindInMap
@@ -245,12 +231,3 @@ Outputs:
     Value: !GetAtt SiteBucket.Arn
   DistributionDomainName:
     Value: !GetAtt Distribution.DomainName
-  CertificateArn:
-    Value: !If [NeedsCertificate, !Ref Certificate, !Ref ExistingCertificate]
-  CertificateType:
-    Value: !If [NeedsCertificate, AcmCertificateArn, !Ref ExistingCertificateType]
-  HostedZoneId:
-    Value: !If [NeedsHostedZone, !Ref HostedZone, !Ref HostedZoneId]
-  NameServers:
-    Condition: NeedsHostedZone
-    Value: !Join [' ', !GetAtt HostedZone.NameServers]

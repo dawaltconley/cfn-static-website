@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates a basic public zone.
+
+Parameters:
+  Domain:
+    Type: String
+    Description: Base domain name for the static website.
+
+Resources:
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref Domain
+      SubjectAlternativeNames:
+        - !Sub '*.${Domain}'
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref Domain
+          HostedZoneId: !Ref HostedZone
+  HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !Sub '${Domain}.'
+
+Outputs:
+  HostedZoneId:
+    Value: !Ref HostedZone
+  NameServers:
+    Value: !Join [' ', !GetAtt HostedZone.NameServers]
+  CertificateArn:
+    Value: !Ref Certificate
+  CertificateType:
+    Value: AcmCertificateArn
