@@ -107,9 +107,7 @@ Conditions:
   HasAcmCertificate: !And
     - !Condition HasCertificate
     - !Equals [!Ref CertificateType, AcmCertificateArn]
-  HasIamCertificate: !And
-    - !Condition HasCertificate
-    - !Equals [!Ref CertificateType, IamCertificateId]
+  HasIamCertificate: !Not [!Condition HasAcmCertificate]
   HasCloudfrontAliases: !Not [!Equals [!Join ['', !Ref CloudFrontAliases], '']]
 
 Resources:
@@ -160,14 +158,8 @@ Resources:
         PriceClass: !Ref CloudFrontPriceClass
         ViewerCertificate: !If
           - HasCertificate
-          - AcmCertificateArn: !If
-              - HasAcmCertificate
-              - !Ref CertificateArn
-              - !Ref AWS::NoValue
-            IamCertificateId: !If
-              - HasIamCertificate
-              - !Ref CertificateArn
-              - !Ref AWS::NoValue
+          - AcmCertificateArn: !If [HasAcmCertificate, !Ref CertificateArn, !Ref AWS::NoValue]
+            IamCertificateId: !If [HasIamCertificate, !Ref CertificateArn, !Ref AWS::NoValue]
             MinimumProtocolVersion: !Ref CloudFrontSecurityPolicy
             SslSupportMethod: sni-only
           - !Ref AWS::NoValue
