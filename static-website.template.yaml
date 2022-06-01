@@ -96,9 +96,6 @@ Conditions:
   HasRedirect: !And
     - !Condition HasSubdomain
     - !Not [!Equals [ !Ref Redirect, 'None']]
-  HasRedirectApexToSubdomain: !And
-    - !Condition HasSubdomain
-    - !Equals [!Ref Redirect, 'ApexToSubdomain']
   HasRedirectSubdomainToApex: !And
     - !Condition HasSubdomain
     - !Equals [!Ref Redirect, 'SubdomainToApex']
