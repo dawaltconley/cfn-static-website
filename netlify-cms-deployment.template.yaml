@@ -20,6 +20,11 @@ Parameters:
   CertificateArn:
     Type: String
     Default: ''
+  Route53Dns:
+    Type: String
+    Description: Whether this domain uses Route53 for its DNS
+    Default: 'true'
+    AllowedValues: ['true', 'false']
 
   # Stack Variables
   ClientAuth:
@@ -57,6 +62,9 @@ Conditions:
   HasCustomApiDomain: !And
     - !Condition HasApiDomain
     - !Condition HasCertificate
+  CreateRecordSetGroup: !And
+    - !Condition HasCustomApiDomain
+    - !Equals [!Ref Route53Dns, 'true']
 
 Resources:
   Deployment:
@@ -99,7 +107,7 @@ Resources:
       BasePath: !Ref ApiBasePath
   RecordSetGroup:
     Type: AWS::Route53::RecordSetGroup
-    Condition: HasCustomApiDomain
+    Condition: CreateRecordSetGroup
     Properties:
       HostedZoneName: !Sub '${ApiDomain}.'
       RecordSets:
