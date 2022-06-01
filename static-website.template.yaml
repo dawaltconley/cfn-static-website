@@ -9,12 +9,13 @@ Parameters:
     Type: String
     Description: Primary subdomain to associate with the website.
     Default: www
-  RedirectApexToSubdomain:
+  Redirect:
     Type: String
-    Default: 'true'
+    Default: ApexToSubdomain
     AllowedValues:
-      - 'true'
-      - 'false'
+      - ApexToSubdomain
+      - SubdomainToApex
+      - None
   TrailingSlash:
     Type: String
     Default: 'true'
@@ -92,9 +93,15 @@ Mappings:
 
 Conditions:
   HasSubdomain: !Not [!Equals [!Ref Subdomain, '']]
-  HasRedirectApexToSubDomain: !And
-    - !Equals [!Ref RedirectApexToSubdomain, 'true']
+  HasRedirect: !And
     - !Condition HasSubdomain
+    - !Not [!Equals [ !Ref Redirect, 'None']]
+  HasRedirectApexToSubdomain: !And
+    - !Condition HasSubdomain
+    - !Equals [!Ref Redirect, 'ApexToSubdomain']
+  HasRedirectSubdomainToApex: !And
+    - !Condition HasSubdomain
+    - !Equals [!Ref Redirect, 'SubdomainToApex']
   CreateRecordSetGroup: !Equals [!Ref Route53Dns, 'true']
   HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
   HasAcmCertificate: !And
@@ -120,7 +127,7 @@ Resources:
             HostedZoneId: Z2FDTNDATAQYW2  # Magic CloudFront number
             DNSName: !GetAtt Distribution.DomainName
         - !If
-          - HasRedirectApexToSubDomain
+          - HasRedirect
           - Name: !Ref Domain
             Type: A
             AliasTarget:
@@ -139,7 +146,7 @@ Resources:
           - !Join
             - ','
             - - !If [HasSubdomain, !Sub '${Subdomain}.${Domain}', !Ref Domain]
-              - !If [HasRedirectApexToSubDomain, !Ref Domain, !Ref 'AWS::NoValue']
+              - !If [HasRedirect, !Ref Domain, !Ref 'AWS::NoValue']
               - !If [HasCloudfrontAliases, !Join [',', !Ref CloudFrontAliases], !Ref 'AWS::NoValue']
         Origins:
           - DomainName: !GetAtt SiteBucket.DomainName
@@ -193,7 +200,8 @@ Resources:
     Properties:
       TemplateURL: ./cloudfront-redirects.template.yaml
       Parameters:
-        Subdomain: !Ref Subdomain
+        # If subdomain exists but redirects to apex, use ApexDomain function
+        Subdomain: !If [HasRedirectSubdomainToApex, '', !Ref Subdomain]
         TrailingSlash: !Ref TrailingSlash
         IndexDocument: !Ref IndexDocument
         UrlRedirectsStackName: !Ref UrlRedirectsStackName
