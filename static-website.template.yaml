@@ -2,6 +2,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: A template for launching static sites on AWS.
 
 Parameters:
+  # Base
   Domain:
     Type: String
     Description: Base domain name for the static website.
@@ -9,6 +10,8 @@ Parameters:
     Type: String
     Description: Primary subdomain to associate with the website. Pass an empty string for apex domains.
     Default: www
+
+  # CloudFront Redirects
   Redirect:
     Type: String
     Default: ApexToSubdomain
@@ -29,6 +32,28 @@ Parameters:
       Name of the stack exporting basic URL redirect functions:
       install from https://github.com/dawaltconley/cloudfront-redirects
     Default: 'UrlRedirects'
+
+  # Domain Config
+  Route53Dns:
+    Type: String
+    Description: Whether this domain uses Route53 for its DNS
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+  CertificateArn:
+    Type: String
+    Description: Represents an existing certificate.
+    Default: ''
+  CertificateType:
+    Type: String
+    Description: >-
+      Indicates whether to use the certificate from the AWS Certificate
+      Manager or AWS Identity and Access Management.
+    Default: AcmCertificateArn
+    AllowedValues:
+    - AcmCertificateArn
+    - IamCertificateId
+
+  # CloudFront config
   CloudFrontAliases:
     Type: CommaDelimitedList
     Description: >-
@@ -63,24 +88,6 @@ Parameters:
       - CachingOptimized
       - CachingOptimizedForUncompressedObjects
       - CachingDisabled
-  Route53Dns:
-    Type: String
-    Description: Whether this domain uses Route53 for its DNS
-    Default: 'true'
-    AllowedValues: ['true', 'false']
-  CertificateArn:
-    Type: String
-    Description: Represents an existing certificate.
-    Default: ''
-  CertificateType:
-    Type: String
-    Description: >-
-      Indicates whether to use the certificate from the AWS Certificate
-      Manager or AWS Identity and Access Management.
-    Default: AcmCertificateArn
-    AllowedValues:
-    - AcmCertificateArn
-    - IamCertificateId
 
 Mappings:
   ManagedCachePolicies:
