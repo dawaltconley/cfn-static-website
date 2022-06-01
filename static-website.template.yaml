@@ -28,6 +28,13 @@ Parameters:
       Name of the stack exporting basic URL redirect functions:
       install from https://github.com/dawaltconley/cloudfront-redirects
     Default: 'UrlRedirects'
+  CloudFrontAliases:
+    Type: CommaDelimitedList
+    Description: >-
+      A list of extra aliases for the CloudFront distribution.
+      The Domain and Subdomain parameters included automatically.
+      DNS records pointing them to the distribution must be handled separately.
+    Default: ''
   CloudFrontPriceClass:
     Type: String
     Description: Price class for CloudFront distribution.
@@ -91,6 +98,7 @@ Conditions:
   HasIamCertificate: !And
     - !Not [!Condition NeedsCertificate]
     - !Equals [!Ref ExistingCertificateType, IamCertificateId]
+  HasCloudfrontAliases: !Not [!Equals [!Join ['', !Ref CloudFrontAliases], '']]
 
 Resources:
 
@@ -142,11 +150,13 @@ Resources:
     Properties:
       DistributionConfig:
         Comment: !If [HasSubdomain, !Sub '${Subdomain}.${Domain}', !Ref Domain]
-        Aliases:
-          - !If [HasSubdomain, !Sub '${Subdomain}.${Domain}', !Ref Domain]
-          - !If [HasRedirectApexToSubDomain, !Ref Domain, !Ref 'AWS::NoValue']
-          # always include primary domain, optionally include base domain
-          # TODO: support redirecting from a subdomain to apex?
+        Aliases: !Split
+          - ','
+          - !Join
+            - ','
+            - - !If [HasSubdomain, !Sub '${Subdomain}.${Domain}', !Ref Domain]
+              - !If [HasRedirectApexToSubDomain, !Ref Domain, !Ref 'AWS::NoValue']
+              - !If [HasCloudfrontAliases, !Join [',', !Ref CloudFrontAliases], !Ref 'AWS::NoValue']
         Origins:
           - DomainName: !GetAtt SiteBucket.DomainName
             Id: s3origin
