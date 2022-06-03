@@ -82,8 +82,16 @@ Parameters:
       - TLSv1
   CloudFrontCachePolicy:
     Type: String
-    Description: Managed CloudFront cache policy to use.
+    Description: Default cache policy.
     Default: CachingOptimized
+    AllowedValues:
+      - CachingOptimized
+      - CachingOptimizedForUncompressedObjects
+      - CachingDisabled
+  CloudFrontHtmlCachePolicy:
+    Type: String
+    Description: Cache policy for delivering HTML files.
+    Default: CachingDisabled
     AllowedValues:
       - CachingOptimized
       - CachingOptimizedForUncompressedObjects
@@ -113,6 +121,7 @@ Conditions:
     - !Equals [!Ref CertificateType, AcmCertificateArn]
   HasIamCertificate: !Not [!Condition HasAcmCertificate]
   HasCloudfrontAliases: !Not [!Equals [!Join ['', !Ref CloudFrontAliases], '']]
+  CreateHtmlCacheBehavior: !Not [!Equals [!Ref CloudFrontCachePolicy, !Ref CloudFrontHtmlCachePolicy]]
 
 Resources:
 
@@ -186,6 +195,29 @@ Resources:
           FunctionAssociations:
             - EventType: viewer-request
               FunctionARN: !GetAtt RedirectFunction.Outputs.FunctionArn
+        CacheBehaviors: !If
+          - CreateHtmlCacheBehavior
+          - 
+            - PathPattern: '*.html'
+              CachePolicyId: !FindInMap
+                - ManagedCachePolicies
+                - !Ref CloudFrontHtmlCachePolicy
+                - Id
+              TargetOriginId: s3origin
+              ViewerProtocolPolicy: redirect-to-https
+              AllowedMethods:
+                - GET
+                - HEAD
+                - OPTIONS
+              CachedMethods:
+                - GET
+                - HEAD
+                - OPTIONS
+              Compress: true
+              FunctionAssociations:
+                - EventType: viewer-request
+                  FunctionARN: !GetAtt RedirectFunction.Outputs.FunctionArn
+          - !Ref AWS::NoValue
   OriginAccessIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
     Properties:
