@@ -6,20 +6,23 @@ Creates a CodeBuild environment for automatically deploying a static website.
 
 ### SiteBucket
 
-Type: String  
-Description: Name of the bucket hosting the static website resources.
+Name of the bucket hosting the static website resources.
+
+Type: String
 
 ### SourceLocation
 
-Type: String  
-Description: Source code location. For GitHub, the GitHub repository's clone URL.
+Source code location. For GitHub, the GitHub repository's clone URL.
+
+Type: String
 
 ## Optional Parameters
 
 ### SourceBranch
 
+Branch of the git source to pull from.
+
 Type: String  
-Description: Branch of the git source to pull from.  
 Default: main
 
 ### SourceType
@@ -30,8 +33,9 @@ AllowedValues: GITHUB,GITHUB_ENTERPRISE
 
 ### BuildSpec
 
+Name of the buildspec file.
+
 Type: String  
-Description: Name of the buildspec file.  
 Default: buildspec.yml
 
 ### EnvironmentType
@@ -53,15 +57,17 @@ AllowedValues: BUILD_GENERAL1_SMALL,BUILD_GENERAL1_MEDIUM,BUILD_GENERAL1_LARGE
 
 ### UseBuildArtifacts
 
+Whether to upload the generated files using build artifacts, or manually.
+
 Type: String  
-Description: Whether to upload the generated files using build artifacts, or manually.  
 Default: true  
 AllowedValues: true,false
 
 ### SecretsManagerArns
 
+List of Secret ARNs that the buildspec will reference.
+
 Type: CommaDelimitedList  
-Description: List of Secret ARNs that the buildspec will reference.  
 Default: 
 
 ### CacheType
@@ -72,8 +78,9 @@ AllowedValues: NO_CACHE,S3,LOCAL
 
 ### SourceCredentials
 
+Personal Access Token, or ARN of CodeBuild Source Credential.
+
 Type: String  
-Description: Personal Access Token, or ARN of CodeBuild Source Credential.  
 Default: 
 
 ## Resources

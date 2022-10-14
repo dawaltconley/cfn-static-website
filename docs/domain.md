@@ -6,8 +6,9 @@ Creates a basic public zone.
 
 ### Domain
 
-Type: String  
-Description: Base domain name for the static website.
+Base domain name for the static website.
+
+Type: String
 
 ## Optional Parameters
 

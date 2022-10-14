@@ -15,11 +15,15 @@ const generateDocs =
       const type = parameter.Default === undefined
         ? requiredParameters
         : optionalParameters;
+      const { Description } = parameter;
+      delete parameter.Description;
+
       const contents = Object.entries(parameter)
         .map(([property, value]) => `${property}: ${value}`)
         .join("  \n");
 
       type.push(`### ${name}`);
+      if (Description) type.push(Description);
       type.push(contents);
     }
 

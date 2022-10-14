@@ -8,27 +8,31 @@ Depends on https://github.com/dawaltconley/netlify-cms-aws
 
 ### HostDomain
 
-Type: String  
-Description: Full domain name (including protocol) where Netlify CMS will be used.
+Full domain name (including protocol) where Netlify CMS will be used.
+
+Type: String
 
 ### ClientAuth
 
+A SSM StringList Parameter, where the first parameter corresponds to the Client ID and the second to the Client Secret used for authorizing with GitHub.
+
 Type: AWS::SSM::Parameter::Value<List<String>>  
-Description: A SSM StringList Parameter, where the first parameter corresponds to the Client ID and the second to the Client Secret used for authorizing with GitHub.  
 NoEcho: true
 
 ## Optional Parameters
 
 ### ApiDomain
 
+Base domain where the api is hosted. Used to create an API Gateway custom domain name for this deployment.
+
 Type: String  
-Description: Base domain where the api is hosted. Used to create an API Gateway custom domain name for this deployment.  
 Default: 
 
 ### ApiSubdomain
 
+Subdomain where the api is hosted. Used to create an API Gateway custom domain name for this deployment.
+
 Type: String  
-Description: Subdomain where the api is hosted. Used to create an API Gateway custom domain name for this deployment.  
 Default: api
 
 ### ApiBasePath
@@ -43,8 +47,9 @@ Default:
 
 ### Route53Dns
 
+Whether this domain uses Route53 for its DNS
+
 Type: String  
-Description: Whether this domain uses Route53 for its DNS  
 Default: true  
 AllowedValues: true,false
 
@@ -75,8 +80,9 @@ Default: /login/oauth/access_token
 
 ### NetlifyStackName
 
+Name of the stack exporting a Rest API ID for a self-hosted Netlify CMS.
+
 Type: String  
-Description: Name of the stack exporting a Rest API ID for a self-hosted Netlify CMS.  
 Default: NetlifyCMSAuth
 
 ## Resources

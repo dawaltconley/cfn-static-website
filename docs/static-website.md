@@ -6,15 +6,17 @@ A template for launching static sites on AWS.
 
 ### Domain
 
-Type: String  
-Description: Base domain name for the static website.
+Base domain name for the static website.
+
+Type: String
 
 ## Optional Parameters
 
 ### Subdomain
 
+Primary subdomain to associate with the website. Pass an empty string for apex domains.
+
 Type: String  
-Description: Primary subdomain to associate with the website. Pass an empty string for apex domains.  
 Default: www
 
 ### Redirect
@@ -36,61 +38,70 @@ Default: index.html
 
 ### UrlRedirectsStackName
 
+Name of the stack exporting basic URL redirect functions: install from https://github.com/dawaltconley/cloudfront-redirects
+
 Type: String  
-Description: Name of the stack exporting basic URL redirect functions: install from https://github.com/dawaltconley/cloudfront-redirects  
 Default: UrlRedirects
 
 ### Route53Dns
 
+Whether this domain uses Route53 for its DNS
+
 Type: String  
-Description: Whether this domain uses Route53 for its DNS  
 Default: true  
 AllowedValues: true,false
 
 ### CertificateArn
 
+Represents an existing certificate.
+
 Type: String  
-Description: Represents an existing certificate.  
 Default: 
 
 ### CertificateType
 
+Indicates whether to use the certificate from the AWS Certificate Manager or AWS Identity and Access Management.
+
 Type: String  
-Description: Indicates whether to use the certificate from the AWS Certificate Manager or AWS Identity and Access Management.  
 Default: AcmCertificateArn  
 AllowedValues: AcmCertificateArn,IamCertificateId
 
 ### CloudFrontAliases
 
+A list of extra aliases for the CloudFront distribution. The Domain and Subdomain parameters included automatically. DNS records pointing them to the distribution must be handled separately.
+
 Type: CommaDelimitedList  
-Description: A list of extra aliases for the CloudFront distribution. The Domain and Subdomain parameters included automatically. DNS records pointing them to the distribution must be handled separately.  
 Default: 
 
 ### CloudFrontPriceClass
 
+Price class for CloudFront distribution.
+
 Type: String  
-Description: Price class for CloudFront distribution.  
 Default: PriceClass_All  
 AllowedValues: PriceClass_100,PriceClass_200,PriceClass_All
 
 ### CloudFrontSecurityPolicy
 
+The minimum security policy for the CloudFront distribution.
+
 Type: String  
-Description: The minimum security policy for the CloudFront distribution.  
 Default: TLSv1.2_2021  
 AllowedValues: TLSv1.2_2021,TLSv1.2_2019,TLSv1.2_2018,TLSv1.1_2016,TLSv1_2016,TLSv1
 
 ### CloudFrontCachePolicy
 
+Default cache policy.
+
 Type: String  
-Description: Default cache policy.  
 Default: CachingOptimized  
 AllowedValues: CachingOptimized,CachingOptimizedForUncompressedObjects,CachingDisabled
 
 ### CloudFrontHtmlCachePolicy
 
+Cache policy for delivering HTML files.
+
 Type: String  
-Description: Cache policy for delivering HTML files.  
 Default: CachingDisabled  
 AllowedValues: CachingOptimized,CachingOptimizedForUncompressedObjects,CachingDisabled
 

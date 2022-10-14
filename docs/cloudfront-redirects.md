@@ -26,8 +26,9 @@ Default: index.html
 
 ### UrlRedirectsStackName
 
+Name of the stack exporting basic URL redirect functions: install from https://github.com/dawaltconley/cloudfront-redirects
+
 Type: String  
-Description: Name of the stack exporting basic URL redirect functions: install from https://github.com/dawaltconley/cloudfront-redirects  
 Default: UrlRedirects
 
 ## Resources
