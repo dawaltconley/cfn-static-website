@@ -1,8 +1,8 @@
-# Depends on https://github.com/dawaltconley/netlify-cms-aws
-
 AWSTemplateFormatVersion: '2010-09-09'
-Description: >-
+Description: |-
   Deployment stage for a website using Netlify CMS.
+
+  Depends on https://github.com/dawaltconley/netlify-cms-aws
 
 Parameters:
   HostDomain:

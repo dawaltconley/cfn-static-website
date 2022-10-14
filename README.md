@@ -4,7 +4,9 @@ A number of modular CloudFormation templates for provisioning resources.
 
 ## Templates
 
-See the full documentation on each template.
+See the full documentation on each template. Note that some templates are 
+dependent on external resources, which must be provisioned first. These 
+resources are linked in their descriptions.
 
 ### Static Site
 

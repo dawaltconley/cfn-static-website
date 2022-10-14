@@ -2,6 +2,8 @@
 
 Deployment stage for a website using Netlify CMS.
 
+Depends on https://github.com/dawaltconley/netlify-cms-aws
+
 ## Parameters
 
 ### HostDomain
