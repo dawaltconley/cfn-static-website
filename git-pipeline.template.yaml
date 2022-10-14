@@ -155,9 +155,7 @@ Resources:
                   - 's3:Get*'
                   - 's3:List*'
               - Effect: Allow
-                Resource:
-                  - !GetAtt LogGroup.Arn
-                  - !Sub '${LogGroup.Arn}:*'
+                Resource: !GetAtt LogGroup.Arn
                 Action:
                   - 'logs:CreateLogGroup'
                   - 'logs:CreateLogStream'
