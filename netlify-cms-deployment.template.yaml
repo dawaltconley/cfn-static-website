@@ -91,7 +91,7 @@ Resources:
     Condition: HasCustomApiDomain
     Properties:
       CertificateArn: !Ref CertificateArn
-      DomainName: !If [HasApiSubdomain, !Sub '${ApiSubdomain}.{ApiDomain}', !Ref ApiDomain]
+      DomainName: !If [HasApiSubdomain, !Sub '${ApiSubdomain}.${ApiDomain}', !Ref ApiDomain]
       EndpointConfiguration:
         Types:
           - EDGE
@@ -111,7 +111,7 @@ Resources:
     Properties:
       HostedZoneName: !Sub '${ApiDomain}.'
       RecordSets:
-        - Name: !If [HasApiSubdomain, !Sub '${ApiSubdomain}.{ApiDomain}', !Ref ApiDomain]
+        - Name: !If [HasApiSubdomain, !Sub '${ApiSubdomain}.${ApiDomain}', !Ref ApiDomain]
           Type: A
           AliasTarget:
             HostedZoneId: !GetAtt DomainName.DistributionHostedZoneId
