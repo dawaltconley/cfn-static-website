@@ -54,6 +54,11 @@ Parameters:
     AllowedValues:
       - 'true'
       - 'false'
+  SecretsManagerArns:
+    Type: CommaDelimitedList
+    Description: >-
+      List of Secret ARNs that the buildspec will reference.
+    Default: ''
   CacheType:
     Type: String
     Default: NO_CACHE
@@ -68,6 +73,7 @@ Parameters:
 
 Conditions:
   UsesArtifacts: !Equals [!Ref UseBuildArtifacts, 'true']
+  UsesSecretsManager: !Not [!Equals [!Join ['', !Ref SecretsManagerArns ], '']]
   DefaultBuildSpec: !Equals [!Ref BuildSpec, buildspec.yml]
   HasCache: !Not [!Equals [!Ref CacheType, NO_CACHE]]
   S3Cache: !Equals [!Ref CacheType, S3]
@@ -169,4 +175,20 @@ Resources:
                   Action:
                     - 's3:PutObject'
                     - 's3:Get*'
+                - !Ref AWS::NoValue
+              - !If
+                - UsesSecretsManager
+                - Effect: Allow
+                  Resource: '*'
+                  Action: 'secretsmanager:ListSecrets'
+                - !Ref AWS::NoValue
+              - !If
+                - UsesSecretsManager
+                - Effect: Allow
+                  Resource: !Ref SecretsManagerArns
+                  Action:
+                    - 'secretsmanager:GetResourcePolicy'
+                    - 'secretsmanager:GetSecretValue'
+                    - 'secretsmanager:DescribeSecret'
+                    - 'secretsmanager:ListSecretVersionIds'
                 - !Ref AWS::NoValue
