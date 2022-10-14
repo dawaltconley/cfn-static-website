@@ -63,7 +63,7 @@ Whether this domain uses Route53 for its DNS
 Represents an existing certificate.
 
 - Type: String
-- Default: 
+- Default: ""
 
 ### CertificateType
 
@@ -80,7 +80,7 @@ Indicates whether to use the certificate from the AWS Certificate Manager or AWS
 A list of extra aliases for the CloudFront distribution. The Domain and Subdomain parameters included automatically. DNS records pointing them to the distribution must be handled separately.
 
 - Type: CommaDelimitedList
-- Default: 
+- Default: ""
 
 ### CloudFrontPriceClass
 

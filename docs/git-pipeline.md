@@ -80,7 +80,7 @@ Whether to upload the generated files using build artifacts, or manually.
 List of Secret ARNs that the buildspec will reference.
 
 - Type: CommaDelimitedList
-- Default: 
+- Default: ""
 
 ### CacheType
 
@@ -96,7 +96,7 @@ List of Secret ARNs that the buildspec will reference.
 Personal Access Token, or ARN of CodeBuild Source Credential.
 
 - Type: String
-- Default: 
+- Default: ""
 
 ## Resources
 

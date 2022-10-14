@@ -26,7 +26,7 @@ A SSM StringList Parameter, where the first parameter corresponds to the Client 
 Base domain where the api is hosted. Used to create an API Gateway custom domain name for this deployment.
 
 - Type: String
-- Default: 
+- Default: ""
 
 ### ApiSubdomain
 
@@ -43,7 +43,7 @@ Subdomain where the api is hosted. Used to create an API Gateway custom domain n
 ### CertificateArn
 
 - Type: String
-- Default: 
+- Default: ""
 
 ### Route53Dns
 
