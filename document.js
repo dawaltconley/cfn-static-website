@@ -1,6 +1,11 @@
 import { yamlParse } from "https://esm.sh/yaml-cfn@^0.3.1";
 import { expandGlob } from "https://deno.land/std@0.159.0/fs/mod.ts";
 
+const defineProperties = (props) =>
+  Object.entries(props)
+    .map(([property, value]) => `${property}: ${value}`)
+    .join("  \n");
+
 const generateDocs =
   ((fileName, { Description, Parameters, Resources, Outputs }) => {
     const lines = [];
@@ -18,13 +23,9 @@ const generateDocs =
       const { Description } = parameter;
       delete parameter.Description;
 
-      const contents = Object.entries(parameter)
-        .map(([property, value]) => `${property}: ${value}`)
-        .join("  \n");
-
       type.push(`### ${name}`);
       if (Description) type.push(Description);
-      type.push(contents);
+      type.push(defineProperties(parameter));
     }
 
     lines.push("## Required Parameters");
@@ -37,23 +38,26 @@ const generateDocs =
     for (const name in Resources) {
       const resource = Resources[name];
       delete resource.Properties;
-      const contents = Object.entries(resource)
-        .map(([property, value]) => `${property}: ${value}`)
-        .join("  \n");
 
       lines.push(`### ${name}`);
-      lines.push(contents);
+      lines.push(defineProperties(resource));
     }
 
     if (Outputs) {
       lines.push("## Outputs");
-      const outputs = Object.entries(Outputs)
-        .map(([name, output]) => `- ${name}${output.Condition ? "?" : ""}`)
-        .join("\n");
-      lines.push(outputs);
+      for (const name in Outputs) {
+        const output = Outputs[name];
+        const { Description } = output;
+        delete output.Description;
+        delete output.Value;
+
+        lines.push(`### ${name}`);
+        if (Description) lines.push(Description);
+        lines.push(defineProperties(output));
+      }
     }
 
-    return lines.join("\n\n");
+    return lines.filter(Boolean).join("\n\n");
   });
 
 try {

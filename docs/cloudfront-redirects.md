@@ -40,4 +40,6 @@ Condition: NeedsCustomFunction
 
 ## Outputs
 
-- FunctionArn
+### FunctionArn
+
+Arn for the function handling subdomain and uri redirects.

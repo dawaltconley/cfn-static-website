@@ -24,7 +24,10 @@ Type: AWS::Route53::HostedZone
 
 ## Outputs
 
-- HostedZoneId
-- NameServers
-- CertificateArn
-- CertificateType
+### HostedZoneId
+
+### NameServers
+
+### CertificateArn
+
+### CertificateType

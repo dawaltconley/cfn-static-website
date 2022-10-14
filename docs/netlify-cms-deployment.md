@@ -108,9 +108,22 @@ Condition: CreateRecordSetGroup
 
 ## Outputs
 
-- DeploymentId
-- DeploymentStageName
-- DeploymentPath?
-- ApiDomainName?
-- DistributionHostedZone?
-- DistributionDomainName?
+### DeploymentId
+
+### DeploymentStageName
+
+### DeploymentPath
+
+Condition: HasCustomApiDomain
+
+### ApiDomainName
+
+Condition: HasCustomApiDomain
+
+### DistributionHostedZone
+
+Condition: HasCustomApiDomain
+
+### DistributionDomainName
+
+Condition: HasCustomApiDomain

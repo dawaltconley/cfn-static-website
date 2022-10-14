@@ -1,7 +1,5 @@
 # spoke.template.yaml
 
-
-
 ## Required Parameters
 
 ### DBPassword

@@ -134,10 +134,16 @@ Type: AWS::S3::BucketPolicy
 
 ## Outputs
 
-- StackName
-- ApexDomain
-- PrimarySubdomain
-- FullDomain
-- SiteBucket
-- SiteBucketArn
-- DistributionDomainName
+### StackName
+
+### ApexDomain
+
+### PrimarySubdomain
+
+### FullDomain
+
+### SiteBucket
+
+### SiteBucketArn
+
+### DistributionDomainName
