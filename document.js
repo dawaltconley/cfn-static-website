@@ -8,16 +8,26 @@ const generateDocs =
     lines.push(`# ${fileName}`);
     lines.push(Description);
 
-    lines.push("## Parameters");
+    const requiredParameters = [];
+    const optionalParameters = [];
     for (const name in Parameters) {
       const parameter = Parameters[name];
+      const type = parameter.Default === undefined
+        ? requiredParameters
+        : optionalParameters;
       const contents = Object.entries(parameter)
         .map(([property, value]) => `${property}: ${value}`)
         .join("  \n");
 
-      lines.push(`### ${name}`);
-      lines.push(contents);
+      type.push(`### ${name}`);
+      type.push(contents);
     }
+
+    lines.push("## Required Parameters");
+    requiredParameters.forEach((p) => lines.push(p));
+
+    lines.push("## Optional Parameters");
+    optionalParameters.forEach((p) => lines.push(p));
 
     lines.push("## Resources");
     for (const name in Resources) {

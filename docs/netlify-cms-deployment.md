@@ -4,12 +4,20 @@ Deployment stage for a website using Netlify CMS.
 
 Depends on https://github.com/dawaltconley/netlify-cms-aws
 
-## Parameters
+## Required Parameters
 
 ### HostDomain
 
 Type: String  
 Description: Full domain name (including protocol) where Netlify CMS will be used.
+
+### ClientAuth
+
+Type: AWS::SSM::Parameter::Value<List<String>>  
+Description: A SSM StringList Parameter, where the first parameter corresponds to the Client ID and the second to the Client Secret used for authorizing with GitHub.  
+NoEcho: true
+
+## Optional Parameters
 
 ### ApiDomain
 
@@ -39,12 +47,6 @@ Type: String
 Description: Whether this domain uses Route53 for its DNS  
 Default: true  
 AllowedValues: true,false
-
-### ClientAuth
-
-Type: AWS::SSM::Parameter::Value<List<String>>  
-Description: A SSM StringList Parameter, where the first parameter corresponds to the Client ID and the second to the Client Secret used for authorizing with GitHub.  
-NoEcho: true
 
 ### GitHostname
 

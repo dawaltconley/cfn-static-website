@@ -2,7 +2,7 @@
 
 
 
-## Parameters
+## Required Parameters
 
 ### DBPassword
 
@@ -12,6 +12,8 @@ AllowedPattern: [^/"@]+
 ConstraintDescription: can include any printable ASCII character except "/", """, or "@".  
 MinLength: 8  
 MaxLength: 128
+
+## Optional Parameters
 
 ### DBInstanceClass
 

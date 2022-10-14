@@ -2,12 +2,14 @@
 
 Creates a basic public zone.
 
-## Parameters
+## Required Parameters
 
 ### Domain
 
 Type: String  
 Description: Base domain name for the static website.
+
+## Optional Parameters
 
 ## Resources
 

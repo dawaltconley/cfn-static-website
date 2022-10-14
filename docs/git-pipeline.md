@@ -2,7 +2,7 @@
 
 Creates a CodeBuild environment for automatically deploying a static website.
 
-## Parameters
+## Required Parameters
 
 ### SiteBucket
 
@@ -13,6 +13,8 @@ Description: Name of the bucket hosting the static website resources.
 
 Type: String  
 Description: Source code location. For GitHub, the GitHub repository's clone URL.
+
+## Optional Parameters
 
 ### SourceBranch
 

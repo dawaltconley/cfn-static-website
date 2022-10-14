@@ -2,12 +2,14 @@
 
 A template for launching static sites on AWS.
 
-## Parameters
+## Required Parameters
 
 ### Domain
 
 Type: String  
 Description: Base domain name for the static website.
+
+## Optional Parameters
 
 ### Subdomain
 
