@@ -10,9 +10,11 @@ Parameters:
     Description: Full domain name (including protocol) where Netlify CMS will be used.
   ApiDomain:
     Type: String
+    Description: Base domain where the api is hosted. Used to create an API Gateway custom domain name for this deployment.
     Default: ''
   ApiSubdomain:
     Type: String
+    Description: Subdomain where the api is hosted. Used to create an API Gateway custom domain name for this deployment.
     Default: api
   ApiBasePath:
     Type: String
