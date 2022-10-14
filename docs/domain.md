@@ -8,7 +8,7 @@ Creates a basic public zone.
 
 Base domain name for the static website.
 
-Type: String
+- Type: String
 
 ## Optional Parameters
 
@@ -16,11 +16,11 @@ Type: String
 
 ### Certificate
 
-Type: AWS::CertificateManager::Certificate
+- Type: AWS::CertificateManager::Certificate
 
 ### HostedZone
 
-Type: AWS::Route53::HostedZone
+- Type: AWS::Route53::HostedZone
 
 ## Outputs
 

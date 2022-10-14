@@ -8,13 +8,13 @@ Creates a CodeBuild environment for automatically deploying a static website.
 
 Name of the bucket hosting the static website resources.
 
-Type: String
+- Type: String
 
 ### SourceLocation
 
 Source code location. For GitHub, the GitHub repository's clone URL.
 
-Type: String
+- Type: String
 
 ## Optional Parameters
 
@@ -22,82 +22,97 @@ Type: String
 
 Branch of the git source to pull from.
 
-Type: String  
-Default: main
+- Type: String
+- Default: main
 
 ### SourceType
 
-Type: String  
-Default: GITHUB  
-AllowedValues: GITHUB,GITHUB_ENTERPRISE
+- Type: String
+- Default: GITHUB
+- AllowedValues:
+  - GITHUB
+  - GITHUB_ENTERPRISE
 
 ### BuildSpec
 
 Name of the buildspec file.
 
-Type: String  
-Default: buildspec.yml
+- Type: String
+- Default: buildspec.yml
 
 ### EnvironmentType
 
-Type: String  
-Default: LINUX_CONTAINER  
-AllowedValues: ARM_CONTAINER,LINUX_CONTAINER,LINUX_GPU_CONTAINER,WINDOWS_CONTAINER,WINDOWS_SERVER_2019_CONTAINER
+- Type: String
+- Default: LINUX_CONTAINER
+- AllowedValues:
+  - ARM_CONTAINER
+  - LINUX_CONTAINER
+  - LINUX_GPU_CONTAINER
+  - WINDOWS_CONTAINER
+  - WINDOWS_SERVER_2019_CONTAINER
 
 ### EnvironmentImage
 
-Type: String  
-Default: aws/codebuild/standard:5.0
+- Type: String
+- Default: aws/codebuild/standard:5.0
 
 ### EnvironmentComputeType
 
-Type: String  
-Default: BUILD_GENERAL1_SMALL  
-AllowedValues: BUILD_GENERAL1_SMALL,BUILD_GENERAL1_MEDIUM,BUILD_GENERAL1_LARGE
+- Type: String
+- Default: BUILD_GENERAL1_SMALL
+- AllowedValues:
+  - BUILD_GENERAL1_SMALL
+  - BUILD_GENERAL1_MEDIUM
+  - BUILD_GENERAL1_LARGE
 
 ### UseBuildArtifacts
 
 Whether to upload the generated files using build artifacts, or manually.
 
-Type: String  
-Default: true  
-AllowedValues: true,false
+- Type: String
+- Default: true
+- AllowedValues:
+  - true
+  - false
 
 ### SecretsManagerArns
 
 List of Secret ARNs that the buildspec will reference.
 
-Type: CommaDelimitedList  
-Default: 
+- Type: CommaDelimitedList
+- Default: 
 
 ### CacheType
 
-Type: String  
-Default: NO_CACHE  
-AllowedValues: NO_CACHE,S3,LOCAL
+- Type: String
+- Default: NO_CACHE
+- AllowedValues:
+  - NO_CACHE
+  - S3
+  - LOCAL
 
 ### SourceCredentials
 
 Personal Access Token, or ARN of CodeBuild Source Credential.
 
-Type: String  
-Default: 
+- Type: String
+- Default: 
 
 ## Resources
 
 ### Build
 
-Type: AWS::CodeBuild::Project
+- Type: AWS::CodeBuild::Project
 
 ### CacheBucket
 
-Type: AWS::S3::Bucket  
-Condition: S3Cache
+- Type: AWS::S3::Bucket
+- Condition: S3Cache
 
 ### LogGroup
 
-Type: AWS::Logs::LogGroup
+- Type: AWS::Logs::LogGroup
 
 ### ServiceRole
 
-Type: AWS::IAM::Role
+- Type: AWS::IAM::Role

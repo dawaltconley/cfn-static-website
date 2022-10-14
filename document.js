@@ -1,10 +1,22 @@
 import { yamlParse } from "https://esm.sh/yaml-cfn@^0.3.1";
 import { expandGlob } from "https://deno.land/std@0.159.0/fs/mod.ts";
 
-const defineProperties = (props) =>
-  Object.entries(props)
-    .map(([property, value]) => `${property}: ${value}`)
-    .join("  \n");
+const list = (items, indent = 0) =>
+  items
+    .map((item) => `${" ".repeat(indent)}- ${item}`)
+    .join("\n");
+
+const defineProperties = (props) => {
+  let defs = Object.entries(props)
+    .map(([property, value]) => {
+      if (property === "AllowedValues") {
+        return `${property}\n${list(value, 2)}`;
+      }
+      return `${property}: ${value}`;
+    });
+  defs = list(defs);
+  return defs;
+};
 
 const generateDocs =
   ((fileName, { Description, Parameters, Resources, Outputs }) => {
