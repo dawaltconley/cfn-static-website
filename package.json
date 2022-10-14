@@ -4,6 +4,8 @@
   "description": "Modular cloudformation stacks for an AWS static website.",
   "main": "static-website.template.yaml",
   "scripts": {
+    "update-docs": "deno run --allow-read --allow-write document.js",
+    "preversion": "npm run update-docs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
