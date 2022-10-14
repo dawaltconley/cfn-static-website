@@ -5,7 +5,7 @@ Parameters:
     Type: String
     Description: >-
       A password to secure access to the Spoke database.
-    AllowedPattern: [^/"@]+
+    AllowedPattern: '[^/"@]+'
     ConstraintDescription: 'can include any printable ASCII character except "/", """, or "@".'
     MinLength: 8
     MaxLength: 128
