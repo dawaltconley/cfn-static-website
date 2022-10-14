@@ -4,8 +4,6 @@ Controls URL cleaning and subdomain redirection.
 
 Depends on https://github.com/dawaltconley/cloudfront-redirects
 
-## Required Parameters
-
 ## Optional Parameters
 
 ### Subdomain

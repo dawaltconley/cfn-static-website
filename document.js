@@ -43,19 +43,25 @@ const generateDocs =
       type.push(defineProperties(parameter));
     }
 
-    lines.push("## Required Parameters");
-    requiredParameters.forEach((p) => lines.push(p));
+    if (requiredParameters.length) {
+      lines.push("## Required Parameters");
+      requiredParameters.forEach((p) => lines.push(p));
+    }
 
-    lines.push("## Optional Parameters");
-    optionalParameters.forEach((p) => lines.push(p));
+    if (optionalParameters.length) {
+      lines.push("## Optional Parameters");
+      optionalParameters.forEach((p) => lines.push(p));
+    }
 
-    lines.push("## Resources");
-    for (const name in Resources) {
-      const resource = Resources[name];
-      delete resource.Properties;
+    if (Resources) {
+      lines.push("## Resources");
+      for (const name in Resources) {
+        const resource = Resources[name];
+        delete resource.Properties;
 
-      lines.push(`### ${name}`);
-      lines.push(defineProperties(resource));
+        lines.push(`### ${name}`);
+        lines.push(defineProperties(resource));
+      }
     }
 
     if (Outputs) {
