@@ -1,5 +1,8 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: A template for launching static sites on AWS.
+Description: |-
+  A template for launching static sites on AWS.
+
+  Includes cloudfront-redirects.template.yaml, which depends on https://github.com/dawaltconley/cloudfront-redirects
 
 Parameters:
   # Base
