@@ -71,3 +71,16 @@ Resources:
         CertificateArn: !GetAtt Domain.Outputs.CertificateArn
         ClientAuth: SSMParameterValue
 ```
+
+Package and deploy:
+
+```bash
+aws cloudformation package \
+  --template-file $TEMPLATE \
+  --s3-bucket $BUCKET \
+  --output-template-file $OUTPUT
+aws cloudformation deploy \
+  --template-file $OUTPUT \
+  --stack-name $STACK_NAME \
+  --capabilities CAPABILITY_IAM
+```
