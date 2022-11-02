@@ -2,6 +2,8 @@
 
 A template for launching static sites on AWS.
 
+Includes cloudfront-redirects.template.yaml, which depends on https://github.com/dawaltconley/cloudfront-redirects
+
 ## Required Parameters
 
 ### Domain
