@@ -117,6 +117,7 @@ Conditions:
   HasRedirectSubdomainToApex: !And
     - !Condition HasSubdomain
     - !Equals [!Ref Redirect, 'SubdomainToApex']
+  HasTrailingSlash: !Equals [!Ref TrailingSlash, 'true']
   CreateRecordSetGroup: !Equals [!Ref Route53Dns, 'true']
   HasCertificate: !Not [!Equals [!Ref CertificateArn, '']]
   HasAcmCertificate: !And
@@ -125,6 +126,9 @@ Conditions:
   HasIamCertificate: !Not [!Condition HasAcmCertificate]
   HasCloudfrontAliases: !Not [!Equals [!Join ['', !Ref CloudFrontAliases], '']]
   CreateHtmlCacheBehavior: !Not [!Equals [!Ref CloudFrontCachePolicy, !Ref CloudFrontHtmlCachePolicy]]
+  DefaultCacheAssumeHtml: !And
+    - !Condition CreateHtmlCacheBehavior
+    - !Not [!Condition HasTrailingSlash]
 
 Resources:
 
@@ -181,45 +185,49 @@ Resources:
           - !Ref AWS::NoValue
         DefaultCacheBehavior:
           TargetOriginId: s3origin
-          CachePolicyId: !FindInMap
-            - ManagedCachePolicies
-            - !Ref CloudFrontCachePolicy
-            - Id
+          CachePolicyId: !If
+            - DefaultCacheAssumeHtml
+            - !FindInMap [ManagedCachePolicies, !Ref CloudFrontHtmlCachePolicy, Id]
+            - !FindInMap [ManagedCachePolicies, !Ref CloudFrontCachePolicy, Id]
           ViewerProtocolPolicy: redirect-to-https
-          AllowedMethods:
-            - GET
-            - HEAD
-            - OPTIONS
-          CachedMethods:
-            - GET
-            - HEAD
-            - OPTIONS
+          AllowedMethods: [GET, HEAD, OPTIONS]
+          CachedMethods: [GET, HEAD, OPTIONS]
           Compress: true
           FunctionAssociations:
             - EventType: viewer-request
               FunctionARN: !GetAtt RedirectFunction.Outputs.FunctionArn
         CacheBehaviors: !If
           - CreateHtmlCacheBehavior
-          - 
-            - PathPattern: '*.html'
-              CachePolicyId: !FindInMap
-                - ManagedCachePolicies
-                - !Ref CloudFrontHtmlCachePolicy
-                - Id
-              TargetOriginId: s3origin
-              ViewerProtocolPolicy: redirect-to-https
-              AllowedMethods:
-                - GET
-                - HEAD
-                - OPTIONS
-              CachedMethods:
-                - GET
-                - HEAD
-                - OPTIONS
-              Compress: true
-              FunctionAssociations:
-                - EventType: viewer-request
-                  FunctionARN: !GetAtt RedirectFunction.Outputs.FunctionArn
+          - !If
+            - HasTrailingSlash
+            - 
+              - PathPattern: '*/'
+                CachePolicyId: !FindInMap
+                  - ManagedCachePolicies
+                  - !Ref CloudFrontHtmlCachePolicy
+                  - Id
+                TargetOriginId: s3origin
+                ViewerProtocolPolicy: redirect-to-https
+                AllowedMethods: [GET, HEAD, OPTIONS]
+                CachedMethods: [GET, HEAD, OPTIONS]
+                Compress: true
+                FunctionAssociations:
+                  - EventType: viewer-request
+                    FunctionARN: !GetAtt RedirectFunction.Outputs.FunctionArn
+            - 
+              - PathPattern: '*.*'
+                CachePolicyId: !FindInMap
+                  - ManagedCachePolicies
+                  - !Ref CloudFrontCachePolicy
+                  - Id
+                TargetOriginId: s3origin
+                ViewerProtocolPolicy: redirect-to-https
+                AllowedMethods: [GET, HEAD, OPTIONS]
+                CachedMethods: [GET, HEAD, OPTIONS]
+                Compress: true
+                FunctionAssociations:
+                  - EventType: viewer-request
+                    FunctionARN: !GetAtt RedirectFunction.Outputs.FunctionArn
           - !Ref AWS::NoValue
   OriginAccessIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
