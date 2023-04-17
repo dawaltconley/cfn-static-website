@@ -1,6 +1,6 @@
 {
   "name": "@dawaltconley/cfn-static-website",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Modular cloudformation stacks for an AWS static website.",
   "main": "static-website.template.yaml",
   "scripts": {
