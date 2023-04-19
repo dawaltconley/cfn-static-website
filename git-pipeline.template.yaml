@@ -54,6 +54,11 @@ Parameters:
     AllowedValues:
       - 'true'
       - 'false'
+  ParameterStoreArns:
+    Type: CommaDelimitedList
+    Description: >-
+      List of Parameter ARNs that the buildspec will reference.
+    Default: ''
   SecretsManagerArns:
     Type: CommaDelimitedList
     Description: >-
@@ -73,6 +78,7 @@ Parameters:
 
 Conditions:
   UsesArtifacts: !Equals [!Ref UseBuildArtifacts, 'true']
+  UsesParameterStore: !Not [!Equals [!Join ['', !Ref ParameterStoreArns ], '']]
   UsesSecretsManager: !Not [!Equals [!Join ['', !Ref SecretsManagerArns ], '']]
   DefaultBuildSpec: !Equals [!Ref BuildSpec, buildspec.yml]
   HasCache: !Not [!Equals [!Ref CacheType, NO_CACHE]]
@@ -175,6 +181,14 @@ Resources:
                   Action:
                     - 's3:PutObject'
                     - 's3:Get*'
+                - !Ref AWS::NoValue
+              - !If
+                - UsesParameterStore
+                - Effect: Allow
+                  Resource: !Ref ParameterStoreArns
+                  Action:
+                    - 'ssm:GetParametersByPath'
+                    - 'ssm:GetParameters'
                 - !Ref AWS::NoValue
               - !If
                 - UsesSecretsManager
