@@ -47,7 +47,9 @@ Resources:
     Type: AWS::CloudFront::Function
     Condition: NeedsCustomFunction
     Properties:
-      Name: !Sub '${AWS::StackName}-URLRedirects'
+      Name: !Sub
+        - 'UrlRedirects_${Id}'
+        - Id: !Select [2, !Split ['/', !Ref AWS::StackId]]
       AutoPublish: true
       FunctionConfig:
         Comment: !Sub 'URI redirection for ${AWS::StackName}'
