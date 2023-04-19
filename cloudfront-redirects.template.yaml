@@ -88,15 +88,21 @@ Resources:
 
           ${FunctionTemplate}
         - FunctionTemplate: !If
-          - IsApex
+          - HasSubdomainRedirect
+          - !If
+            - IsApex
+            - !If
+              - HasTrailingSlash
+              - !FindInMap [Functions, ApexDomain, Template]
+              - !FindInMap [Functions, ApexDomainNoSlash, Template]
+            - !If
+              - HasTrailingSlash
+              - !FindInMap [Functions, Subdomain, Template]
+              - !FindInMap [Functions, SubdomainNoSlash, Template]
           - !If
             - HasTrailingSlash
-            - !FindInMap [Functions, ApexDomain, Template]
-            - !FindInMap [Functions, ApexDomainNoSlash, Template]
-          - !If
-            - HasTrailingSlash
-            - !FindInMap [Functions, Subdomain, Template]
-            - !FindInMap [Functions, SubdomainNoSlash, Template]
+            - !FindInMap [Functions, Relative, Template]
+            - !FindInMap [Functions, RelativeNoSlash, Template]
 
 Outputs:
   FunctionArn:
@@ -126,6 +132,71 @@ Outputs:
 
 Mappings:
   Functions: # copied from https://github.com/dawaltconley/cloudfront-redirects/tree/v1.0.1
+    Relative: 
+      Template: |-
+        function redirect(uri) {
+            return {
+                statusCode: 301,
+                statusDescription: 'Moved Permanently',
+                headers: { location: { value: uri } },
+            };
+        }
+
+        function handler(event) {
+            var request = event.request;
+            var uri = request.uri || '/';
+
+            if (uri.endsWith('/')) {
+                // add index document and return properly-formatted requests
+                request.uri = uri + indexDocument;
+                return request;
+            }
+
+            if (uri.endsWith('/' + indexDocument)) {
+                // trim index document
+                return redirect(uri.slice(0, -indexDocument.length));
+            }
+
+            if (!request.uri.includes('.')) {
+                // add trailing slash
+                return redirect(uri + '/');
+            }
+
+            return request;
+        }
+    RelativeNoSlash:
+      Template: |-
+        function redirect(uri) {
+            return {
+                statusCode: 301,
+                statusDescription: 'Moved Permanently',
+                headers: { location: { value: uri } },
+            };
+        }
+
+        function handler(event) {
+            var request = event.request;
+            var uri = request.uri;
+
+            if (uri.endsWith('/')) {
+                // trim trailing slash
+                uri = uri.slice(0, -1);
+            } else if (uri.endsWith('/' + indexDocument)) {
+                // trim index document
+                uri = uri.slice(0, -indexDocument.length - 1);
+                if (!uri) uri = '/';
+            }
+
+            if (uri && uri !== request.uri) {
+                return redirect(uri);
+            }
+
+            if (!request.uri.includes('.')) {
+                // add index document and return properly-formatted requests
+                request.uri = `${uri}/${indexDocument}`;
+            }
+            return request;
+        }
     ApexDomain:
       Template: |-
         function redirect(uri) {
