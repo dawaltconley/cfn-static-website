@@ -234,6 +234,7 @@ Resources:
       Parameters:
         # If subdomain exists but redirects to apex, use ApexDomain function
         Subdomain: !If [HasRedirectSubdomainToApex, '', !Ref Subdomain]
+        SubdomainRedirect: !If [HasRedirect, 'true', 'false']
         TrailingSlash: !Ref TrailingSlash
         IndexDocument: !Ref IndexDocument
         UrlRedirectsStackName: !Ref UrlRedirectsStackName

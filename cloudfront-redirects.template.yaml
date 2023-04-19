@@ -8,6 +8,10 @@ Parameters:
   Subdomain:
     Type: String
     Default: 'www'
+  SubdomainRedirect:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
   TrailingSlash:
     Type: String
     Default: 'true'
@@ -25,22 +29,35 @@ Parameters:
 Conditions:
   IsApex: !Equals [!Ref Subdomain, '']
   IsWWW: !Equals [!Ref Subdomain, 'www']
+  HasSubdomainRedirect: !Equals [!Ref SubdomainRedirect, 'true']
   HasTrailingSlash: !Equals [!Ref TrailingSlash, 'true']
+  UsesCleanUrls: !And
+    - !Not [!Condition HasSubdomainRedirect]
+    - !Condition HasTrailingSlash
+  UsesCleanUrlsNoSlash: !And
+    - !Not [!Condition HasSubdomainRedirect]
+    - !Not [!Condition HasTrailingSlash]
   UsesApexDomainCleanUrls: !And
+    - !Condition HasSubdomainRedirect
     - !Condition IsApex
     - !Condition HasTrailingSlash
   UsesApexDomainCleanUrlsNoSlash: !And
+    - !Condition HasSubdomainRedirect
     - !Condition IsApex
     - !Not [!Condition HasTrailingSlash]
   UsesWWWDomainCleanUrls: !And
+    - !Condition HasSubdomainRedirect
     - !Condition IsWWW
     - !Condition HasTrailingSlash
   UsesWWWDomainCleanUrlsNoSlash: !And
+    - !Condition HasSubdomainRedirect
     - !Condition IsWWW
     - !Not [!Condition HasTrailingSlash]
   NeedsCustomFunction: !Or
     - !Not [!Equals [!Ref IndexDocument, 'index.html']]
-    - !Not [!Or [!Condition IsApex, !Condition IsWWW]]
+    - !And
+      - !Condition HasSubdomainRedirect
+      - !Not [!Or [!Condition IsApex, !Condition IsWWW]]
 
 Resources:
   RedirectFunction:
@@ -78,18 +95,24 @@ Outputs:
       - NeedsCustomFunction
       - !GetAtt RedirectFunction.FunctionMetadata.FunctionARN
       - !If
-        - UsesApexDomainCleanUrls
-        - Fn::ImportValue: !Sub '${UrlRedirectsStackName}-ApexDomainCleanUrls'
+        - UsesCleanUrls
+        - Fn::ImportValue: !Sub '${UrlRedirectsStackName}-CleanUrls'
         - !If
-          - UsesApexDomainCleanUrlsNoSlash
-          - Fn::ImportValue: !Sub '${UrlRedirectsStackName}-ApexDomainCleanUrlsNoSlash'
+          - UsesCleanUrlsNoSlash
+          - Fn::ImportValue: !Sub '${UrlRedirectsStackName}-CleanUrlsNoSlash'
           - !If
-            - UsesWWWDomainCleanUrls
-            - Fn::ImportValue: !Sub '${UrlRedirectsStackName}-WWWDomainCleanUrls'
+            - UsesApexDomainCleanUrls
+            - Fn::ImportValue: !Sub '${UrlRedirectsStackName}-ApexDomainCleanUrls'
             - !If
-              - UsesWWWDomainCleanUrlsNoSlash
-              - Fn::ImportValue: !Sub '${UrlRedirectsStackName}-WWWDomainCleanUrlsNoSlash'
-              - !Ref AWS::NoValue
+              - UsesApexDomainCleanUrlsNoSlash
+              - Fn::ImportValue: !Sub '${UrlRedirectsStackName}-ApexDomainCleanUrlsNoSlash'
+              - !If
+                - UsesWWWDomainCleanUrls
+                - Fn::ImportValue: !Sub '${UrlRedirectsStackName}-WWWDomainCleanUrls'
+                - !If
+                  - UsesWWWDomainCleanUrlsNoSlash
+                  - Fn::ImportValue: !Sub '${UrlRedirectsStackName}-WWWDomainCleanUrlsNoSlash'
+                  - !Ref AWS::NoValue
 
 Mappings:
   Functions: # copied from https://github.com/dawaltconley/cloudfront-redirects/tree/v1.0.1
