@@ -31,33 +31,43 @@ Conditions:
   IsWWW: !Equals [!Ref Subdomain, 'www']
   HasSubdomainRedirect: !Equals [!Ref SubdomainRedirect, 'true']
   HasTrailingSlash: !Equals [!Ref TrailingSlash, 'true']
+  HasDefaultIndex: !Equals [!Ref IndexDocument, 'index.html']
   UsesCleanUrls: !And
+    - !Condition HasDefaultIndex
     - !Not [!Condition HasSubdomainRedirect]
     - !Condition HasTrailingSlash
   UsesCleanUrlsNoSlash: !And
+    - !Condition HasDefaultIndex
     - !Not [!Condition HasSubdomainRedirect]
     - !Not [!Condition HasTrailingSlash]
   UsesApexDomainCleanUrls: !And
+    - !Condition HasDefaultIndex
     - !Condition HasSubdomainRedirect
     - !Condition IsApex
     - !Condition HasTrailingSlash
   UsesApexDomainCleanUrlsNoSlash: !And
+    - !Condition HasDefaultIndex
     - !Condition HasSubdomainRedirect
     - !Condition IsApex
     - !Not [!Condition HasTrailingSlash]
   UsesWWWDomainCleanUrls: !And
+    - !Condition HasDefaultIndex
     - !Condition HasSubdomainRedirect
     - !Condition IsWWW
     - !Condition HasTrailingSlash
   UsesWWWDomainCleanUrlsNoSlash: !And
+    - !Condition HasDefaultIndex
     - !Condition HasSubdomainRedirect
     - !Condition IsWWW
     - !Not [!Condition HasTrailingSlash]
-  NeedsCustomFunction: !Or
-    - !Not [!Equals [!Ref IndexDocument, 'index.html']]
-    - !And
-      - !Condition HasSubdomainRedirect
-      - !Not [!Or [!Condition IsApex, !Condition IsWWW]]
+  NeedsCustomFunction: !Not
+    - !Or
+      - !Condition UsesCleanUrls
+      - !Condition UsesCleanUrlsNoSlash
+      - !Condition UsesApexDomainCleanUrls
+      - !Condition UsesApexDomainCleanUrlsNoSlash
+      - !Condition UsesWWWDomainCleanUrls
+      - !Condition UsesWWWDomainCleanUrlsNoSlash
 
 Resources:
   RedirectFunction:
