@@ -59,65 +59,17 @@ Resources:
           var primarySubdomain = '${Subdomain}';
           var indexDocument = '${IndexDocument}';
 
-          function redirect(uri) {
-              return {
-                  statusCode: 301,
-                  statusDescription: 'Moved Permanently',
-                  headers: { location: { value: uri } },
-              };
-          }
-
-          function handler(event) {
-              var request = event.request;
-              var uri = request.uri;
-              var host = request.headers.host.value;
-              var subdomains = host.split('.');
-
-              if (subdomains[subdomains.length - 3] !== primarySubdomain) {
-                  var apex = subdomains.slice(-2).join('.');
-                  uri = `https://${!primarySubdomain}.${!apex + uri}`;
-              }
-
-              if (uri.endsWith('/')) {
-                ${UriTrailingSlash}
-              }
-              if (uri.endsWith('/' + indexDocument)) {
-                ${UriIndexDocument}
-              }
-              if (!request.uri.includes('.')) {
-                ${UriNoTrailingSlash}
-              }
-              if (uri !== request.uri) {
-                return redirect(uri);
-              }
-
-              return request;
-          }
-        - UriTrailingSlash: !If
+          ${FunctionTemplate}
+        - FunctionTemplate: !If
+          - IsApex
+          - !If
             - HasTrailingSlash
-            - |-
-              if (uri !== request.uri) {
-                return redirect(uri);
-              }
-              request.uri += indexDocument;
-              return request;
-            - |-
-              return redirect(uri.slice(0, -1));
-          UriIndexDocument: !Sub
-            - |-
-              var newUri = uri.slice(0, -indexDocument.length${SliceMod});
-              return redirect(newUri);
-            - SliceMod: !If [HasTrailingSlash, '', ' - 1']
-          UriNoTrailingSlash: !If
+            - !FindInMap [Functions, ApexDomain, Template]
+            - !FindInMap [Functions, ApexDomainNoSlash, Template]
+          - !If
             - HasTrailingSlash
-            - |-
-              return redirect(uri + '/');
-            - |-
-              if (uri !== request.uri) {
-                return redirect(uri);
-              }
-              request.uri += '/' + indexDocument;
-              return request;
+            - !FindInMap [Functions, Subdomain, Template]
+            - !FindInMap [Functions, SubdomainNoSlash, Template]
 
 Outputs:
   FunctionArn:
@@ -138,3 +90,170 @@ Outputs:
               - UsesWWWDomainCleanUrlsNoSlash
               - Fn::ImportValue: !Sub '${UrlRedirectsStackName}-WWWDomainCleanUrlsNoSlash'
               - !Ref AWS::NoValue
+
+Mappings:
+  Functions: # copied from https://github.com/dawaltconley/cloudfront-redirects/tree/v1.0.1
+    ApexDomain:
+      Template: |-
+        function redirect(uri) {
+            return {
+                statusCode: 301,
+                statusDescription: 'Moved Permanently',
+                headers: { location: { value: uri } },
+            };
+        }
+
+        function handler(event) {
+            var request = event.request;
+            var uri = request.uri || '/';
+            var host = request.headers.host.value;
+            var subdomains = host.split('.');
+
+            if (subdomains.length > 2) {
+                // redirect to apex domain
+                var apex = subdomains.slice(-2).join('.');
+                uri = 'https://' + apex + uri;
+                if (uri.endsWith('/')) {
+                    return redirect(uri);
+                }
+            }
+
+            if (uri.endsWith('/')) {
+                // add index document and return properly-formatted requests
+                request.uri = uri + indexDocument;
+                return request;
+            } else if (uri.endsWith('/' + indexDocument)) {
+                // trim index document
+                uri = uri.slice(0, -indexDocument.length);
+            } else if (!request.uri.includes('.')) {
+                // add trailing slash
+                uri += '/';
+            }
+
+            if (uri !== request.uri) {
+                // redirect if uri has changed
+                return redirect(uri);
+            }
+
+            return request;
+        }
+    ApexDomainNoSlash:
+      Template: |-
+        function handler(event) {
+            var request = event.request;
+            var uri = request.uri;
+            var host = request.headers.host.value;
+            var subdomains = host.split('.');
+
+            if (subdomains.length > 2) {
+                // redirect to primary subdomain
+                var apex = subdomains.slice(-2).join('.');
+                uri = 'https://' + apex + uri;
+            }
+
+            if (uri.endsWith('/')) {
+                // trim trailing slash
+                uri = uri.slice(0, -1);
+            } else if (uri.endsWith('/' + indexDocument)) {
+                // trim index document
+                uri = uri.slice(0, -indexDocument.length - 1);
+                if (!uri) uri = '/';
+            }
+
+            if (uri && uri !== request.uri) {
+                // redirect if uri has changed
+                return {
+                    statusCode: 301,
+                    statusDescription: 'Moved Permanently',
+                    headers: { location: { value: uri } },
+                };
+            }
+
+            if (!request.uri.includes('.')) {
+                // add trailing slash
+                request.uri = `${uri}/${indexDocument}`;
+            }
+            return request;
+        }
+    Subdomain:
+      Template: |-
+        function redirect(uri) {
+            return {
+                statusCode: 301,
+                statusDescription: 'Moved Permanently',
+                headers: { location: { value: uri } },
+            };
+        }
+
+        function handler(event) {
+            var request = event.request;
+            var uri = request.uri || '/';
+            var host = request.headers.host.value;
+            var subdomains = host.split('.');
+
+            if (subdomains[subdomains.length - 3] !== primarySubdomain) {
+                // redirect to primary subdomain
+                var apex = subdomains.slice(-2).join('.');
+                uri = `https://${primarySubdomain}.${apex + uri}`;
+                if (uri.endsWith('/')) {
+                    return redirect(uri);
+                }
+            }
+
+            if (uri.endsWith('/')) {
+                // add index document and return properly-formatted requests
+                request.uri = uri + indexDocument;
+                return request;
+            } else if (uri.endsWith('/' + indexDocument)) {
+                // trim index document
+                uri = uri.slice(0, -indexDocument.length);
+            } else if (!request.uri.includes('.')) {
+                // add trailing slash
+                uri += '/';
+            }
+
+            if (uri !== request.uri) {
+                // redirect if uri has changed
+                return redirect(uri);
+            }
+
+            return request;
+        }
+    SubdomainNoSlash:
+      Template: |-
+        function handler(event) {
+            var request = event.request;
+            var uri = request.uri;
+            var host = request.headers.host.value;
+            var subdomains = host.split('.');
+
+            if (subdomains[subdomains.length - 3] !== primarySubdomain) {
+                // redirect to primary subdomain
+                var apex = subdomains.slice(-2).join('.');
+                uri = `https://${primarySubdomain}.${apex + uri}`;
+            }
+
+            if (uri.endsWith('/')) {
+                // trim trailing slash
+                uri = uri.slice(0, -1);
+            } else if (uri.endsWith('/' + indexDocument)) {
+                // trim index document
+                uri = uri.slice(0, -indexDocument.length - 1);
+                if (!uri) uri = '/';
+            }
+
+            if (uri && uri !== request.uri) {
+                // redirect if uri has changed
+                return {
+                    statusCode: 301,
+                    statusDescription: 'Moved Permanently',
+                    headers: { location: { value: uri } },
+                };
+            }
+
+            if (!request.uri.includes('.')) {
+                // add trailing slash
+                request.uri = `${uri}/${indexDocument}`;
+            }
+            return request;
+        }
