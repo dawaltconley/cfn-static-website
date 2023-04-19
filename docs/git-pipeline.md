@@ -75,6 +75,13 @@ Whether to upload the generated files using build artifacts, or manually.
   - true
   - false
 
+### ParameterStoreArns
+
+List of Parameter ARNs that the buildspec will reference.
+
+- Type: CommaDelimitedList
+- Default: ""
+
 ### SecretsManagerArns
 
 List of Secret ARNs that the buildspec will reference.

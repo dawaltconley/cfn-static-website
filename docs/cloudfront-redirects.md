@@ -11,6 +11,14 @@ Depends on https://github.com/dawaltconley/cloudfront-redirects
 - Type: String
 - Default: www
 
+### SubdomainRedirect
+
+- Type: String
+- Default: true
+- AllowedValues:
+  - true
+  - false
+
 ### TrailingSlash
 
 - Type: String
