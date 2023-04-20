@@ -5,6 +5,11 @@ Parameters:
   SiteBucket:
     Type: String
     Description: Name of the bucket hosting the static website resources.
+  SiteBucketEnvVariable:
+    Type: String
+    Description: >-
+      Name of the build environment variable that exposes the SiteBucket value.
+    Default: SITE_BUCKET
   SourceLocation:
     Type: String
     Description: Source code location. For GitHub, the GitHub repository's clone URL.
@@ -77,6 +82,7 @@ Parameters:
     Default: ''
 
 Conditions:
+  HasSiteBucketEnvVariable: !Not [!Equals [!Ref SiteBucketEnvVariable, '']]
   UsesArtifacts: !Equals [!Ref UseBuildArtifacts, 'true']
   UsesParameterStore: !Not [!Equals [!Join ['', !Ref ParameterStoreArns ], '']]
   UsesSecretsManager: !Not [!Equals [!Join ['', !Ref SecretsManagerArns ], '']]
@@ -117,6 +123,11 @@ Resources:
         Type: !Ref EnvironmentType
         Image: !Ref EnvironmentImage
         ComputeType: !Ref EnvironmentComputeType
+        EnvironmentVariables: !If
+          - HasSiteBucketEnvVariable
+          - - Name: !Ref SiteBucketEnvVariable
+              Value: !Ref SiteBucket
+          - !Ref AWS::NoValue
       Artifacts: !If
         - UsesArtifacts
         - Type: S3
