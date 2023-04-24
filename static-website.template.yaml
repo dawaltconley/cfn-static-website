@@ -4,6 +4,12 @@ Description: |-
 
   Includes cloudfront-redirects.template.yaml, which depends on https://github.com/dawaltconley/cloudfront-redirects
 
+Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+        - W3002 # ignore warnings about dependency on the `package` command
+
 Parameters:
   # Base
   Domain:
