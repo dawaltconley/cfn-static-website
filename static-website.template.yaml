@@ -260,9 +260,13 @@ Resources:
       Bucket: !Ref SiteBucket
       PolicyDocument:
         Statement:
-          - Action: s3:GetObject
+          - Action:
+              - 's3:ListBucket'
+              - 's3:GetObject'
             Effect: Allow
-            Resource: !Sub '${SiteBucket.Arn}/*'
+            Resource:
+              - !Sub '${SiteBucket.Arn}'
+              - !Sub '${SiteBucket.Arn}/*'
             Principal:
               CanonicalUser: !GetAtt OriginAccessIdentity.S3CanonicalUserId
 
