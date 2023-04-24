@@ -21,6 +21,13 @@ Primary subdomain to associate with the website. Pass an empty string for apex d
 - Type: String
 - Default: www
 
+### 404Page
+
+S3 object path to a custom 404 page.
+
+- Type: String
+- Default: ""
+
 ### Redirect
 
 - Type: String

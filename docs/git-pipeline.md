@@ -18,6 +18,13 @@ Source code location. For GitHub, the GitHub repository's clone URL.
 
 ## Optional Parameters
 
+### SiteBucketEnvVariable
+
+Name of the build environment variable that exposes the SiteBucket value.
+
+- Type: String
+- Default: SITE_BUCKET
+
 ### SourceBranch
 
 Branch of the git source to pull from.
