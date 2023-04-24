@@ -13,6 +13,10 @@ Parameters:
     Type: String
     Description: Primary subdomain to associate with the website. Pass an empty string for apex domains.
     Default: www
+  404Page:
+    Type: String
+    Description: S3 object path to a custom 404 page.
+    Default: ''
 
   # CloudFront Redirects
   Redirect:
@@ -110,6 +114,7 @@ Mappings:
       Id: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
 
 Conditions:
+  Has404Page: !Not [!Equals [!Ref 404Page, '']]
   HasSubdomain: !Not [!Equals [!Ref Subdomain, '']]
   HasRedirect: !And
     - !Condition HasSubdomain
@@ -178,6 +183,13 @@ Resources:
             IamCertificateId: !If [HasIamCertificate, !Ref CertificateArn, !Ref AWS::NoValue]
             MinimumProtocolVersion: !Ref CloudFrontSecurityPolicy
             SslSupportMethod: sni-only
+          - !Ref AWS::NoValue
+        CustomErrorResponses: !If
+          - Has404Page
+          -
+            - ErrorCode: 404
+              ResponseCode: 404
+              ResponsePagePath: !Ref 404Page
           - !Ref AWS::NoValue
         DefaultCacheBehavior:
           TargetOriginId: s3origin
