@@ -175,7 +175,9 @@ Resources:
                   - !Sub 'arn:${AWS::Partition}:s3:::${SiteBucket}/*'
                 Action:
                   - 's3:PutObject'
-                  - 's3:Get*'
+                  - 's3:DeleteObject'
+                  - 's3:GetObject*'
+                  - 's3:GetBucket*'
                   - 's3:List*'
               - Effect: Allow
                 Resource: !GetAtt LogGroup.Arn
