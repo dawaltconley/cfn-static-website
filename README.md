@@ -1,14 +1,12 @@
-# CloudFormation Templates
+# Static Website CloudFormation Templates
 
-A number of modular CloudFormation templates for provisioning resources.
+A number of modular CloudFormation templates for static website resources.
 
 ## Templates
 
-See the full documentation on each template. Note that some templates are 
-dependent on external resources, which must be provisioned first. These 
-resources are linked in their descriptions.
-
-### Static Site
+See the full documentation on each template. Note that some templates depend on 
+external resources, which must be provisioned first. These resources are linked 
+in their descriptions.
 
 - [domain.template.yaml](docs/domain.md)
 - [cloudfront-redirects.template.yaml](docs/cloudfront-redirects.md)
@@ -16,16 +14,12 @@ resources are linked in their descriptions.
 - [git-pipeline.template.yaml](docs/git-pipeline.md)
 - [netlify-cms-deployment.template.yaml](docs/netlify-cms-deployment.md)
 
-### Misc
-
-- [spoke.template.yaml](docs/spoke.md)
-
 ## Example Usage
 
 Install the templates using npm:
 
 ```
-npm install --save-dev github:dawaltconley/cfn-static-website#semver:^2.2.1
+npm install --save-dev github:dawaltconley/cfn-static-website#semver:^2.4.1
 ```
 
 Create a template that references these as nested templates:
