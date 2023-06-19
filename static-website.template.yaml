@@ -104,7 +104,7 @@ Parameters:
   CloudFrontHtmlCachePolicy:
     Type: String
     Description: Cache policy for delivering HTML files.
-    Default: CachingDisabled
+    Default: CachingOptimized
     AllowedValues:
       - CachingOptimized
       - CachingOptimizedForUncompressedObjects
