@@ -105,6 +105,13 @@ List of Secret ARNs that the buildspec will reference.
   - S3
   - LOCAL
 
+### CacheExpiration
+
+The number of days after which the cache objects will expire. Only applies to S3 CacheTypes. Set to 0 to keep cache objects indefinitely.
+
+- Type: Number
+- Default: 0
+
 ### SourceCredentials
 
 Personal Access Token, or ARN of CodeBuild Source Credential.

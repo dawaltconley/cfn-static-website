@@ -76,6 +76,12 @@ Parameters:
       - NO_CACHE
       - S3
       - LOCAL
+  CacheExpiration:
+    Type: Number
+    Description: >-
+      The number of days after which the cache objects will expire. Only applies to S3 CacheTypes.
+      Set to 0 to keep cache objects indefinitely.
+    Default: '0'
   SourceCredentials:
     Type: String
     Description: Personal Access Token, or ARN of CodeBuild Source Credential.
@@ -89,6 +95,7 @@ Conditions:
   DefaultBuildSpec: !Equals [!Ref BuildSpec, buildspec.yml]
   HasCache: !Not [!Equals [!Ref CacheType, NO_CACHE]]
   S3Cache: !Equals [!Ref CacheType, S3]
+  HasCacheExpiration: !Not [!Equals [!Ref CacheExpiration, '0']]
   HasSourceCredentials: !Not [!Equals [!Ref SourceCredentials, '']]
 
 Resources:
@@ -152,6 +159,13 @@ Resources:
   CacheBucket:
     Type: AWS::S3::Bucket
     Condition: S3Cache
+    Properties:
+      LifecycleConfiguration: !If
+        - HasCacheExpiration
+        - Rules:
+            - ExpirationInDays: !Ref CacheExpiration
+              Status: Enabled
+        - !Ref AWS::NoValue
   LogGroup:
     Type: AWS::Logs::LogGroup
   ServiceRole:
