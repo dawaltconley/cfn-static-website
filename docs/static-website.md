@@ -118,7 +118,7 @@ The minimum security policy for the CloudFront distribution.
 
 ### CloudFrontCachePolicy
 
-Default cache policy.
+Default edge cache policy.
 
 - Type: String
 - Default: CachingOptimized
@@ -129,10 +129,10 @@ Default cache policy.
 
 ### CloudFrontHtmlCachePolicy
 
-Cache policy for delivering HTML files.
+Edge cache policy for HTML files.
 
 - Type: String
-- Default: CachingDisabled
+- Default: CachingOptimized
 - AllowedValues:
   - CachingOptimized
   - CachingOptimizedForUncompressedObjects

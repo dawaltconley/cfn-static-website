@@ -95,7 +95,7 @@ Parameters:
       - TLSv1
   CloudFrontCachePolicy:
     Type: String
-    Description: Default cache policy.
+    Description: Default edge cache policy.
     Default: CachingOptimized
     AllowedValues:
       - CachingOptimized
@@ -103,8 +103,8 @@ Parameters:
       - CachingDisabled
   CloudFrontHtmlCachePolicy:
     Type: String
-    Description: Cache policy for delivering HTML files.
-    Default: CachingDisabled
+    Description: Edge cache policy for HTML files.
+    Default: CachingOptimized
     AllowedValues:
       - CachingOptimized
       - CachingOptimizedForUncompressedObjects
