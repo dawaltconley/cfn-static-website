@@ -13,9 +13,17 @@ Parameters:
     Type: String
     Description: If provided, creates a record set group connecting the custom domain to a Route53 zone.
     Default: ''
+  HostedZoneName:
+    Type: String
+    Description: Can provide this as an alternative to HostedZoneId
+    Default: ''
 
 Conditions:
-  CreateRecordSetGroup: !Not [!Equals [!Ref HostedZoneId, '']]
+  HasHostedZoneId: !Not [!Equals [!Ref HostedZoneId, '']]
+  HasHostedZoneName: !Not [!Equals [!Ref HostedZoneName, '']]
+  CreateRecordSetGroup: !Or
+    - !Condition HasHostedZoneId
+    - !Condition HasHostedZoneName
 
 Resources:
   CustomDomain:
@@ -29,14 +37,22 @@ Resources:
   RecordSetGroup:
     Type: AWS::Route53::RecordSetGroup
     Condition: CreateRecordSetGroup
-    Properties:
-      HostedZoneId: !Ref HostedZoneId
-      RecordSets:
-        - Name: !Ref CustomDomain
-          Type: A
-          AliasTarget:
-            HostedZoneId: !GetAtt CustomDomain.RegionalHostedZoneId
-            DNSName: !GetAtt CustomDomain.RegionalDomainName
+    Properties: !If
+      - HasHostedZoneId
+      - HostedZoneId: !Ref HostedZoneId
+        RecordSets:
+          - Name: !Ref CustomDomain
+            Type: A
+            AliasTarget:
+              HostedZoneId: !GetAtt CustomDomain.RegionalHostedZoneId
+              DNSName: !GetAtt CustomDomain.RegionalDomainName
+      - HostedZoneName: !Ref HostedZoneName
+        RecordSets:
+          - Name: !Ref CustomDomain
+            Type: A
+            AliasTarget:
+              HostedZoneId: !GetAtt CustomDomain.RegionalHostedZoneId
+              DNSName: !GetAtt CustomDomain.RegionalDomainName
 
 Outputs:
   CustomDomain:
