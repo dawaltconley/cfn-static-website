@@ -109,6 +109,7 @@ The minimum security policy for the CloudFront distribution.
 - Type: String
 - Default: TLSv1.2_2021
 - AllowedValues:
+  - SSLv3
   - TLSv1.2_2021
   - TLSv1.2_2019
   - TLSv1.2_2018

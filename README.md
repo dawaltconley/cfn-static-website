@@ -9,6 +9,7 @@ external resources, which must be provisioned first. These resources are linked
 in their descriptions.
 
 - [domain.template.yaml](docs/domain.md)
+- [api-domain.template.yaml](docs/api-domain.md)
 - [cloudfront-redirects.template.yaml](docs/cloudfront-redirects.md)
 - [static-website.template.yaml](docs/static-website.md)
 - [git-pipeline.template.yaml](docs/git-pipeline.md)

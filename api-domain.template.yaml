@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Creates a custom domain for API Gateway.
+
+Parameters:
+  ApiDomain:
+    Type: String
+    Description: Full domain for the API Gateway custom domain that you want to create.
+  CertificateArn:
+    Type: String
+    Description: Certificate Manager ARN for the ApiDomain certificate. Required to use a custom domain.
+  HostedZoneId:
+    Type: String
+    Description: If provided, creates a record set group connecting the custom domain to a Route53 zone.
+    Default: ''
+
+Conditions:
+  CreateRecordSetGroup: !Not [!Equals [!Ref HostedZoneId, '']]
+
+Resources:
+  CustomDomain:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: !Ref ApiDomain
+      DomainNameConfigurations:
+        - CertificateArn: !Ref CertificateArn
+          SecurityPolicy: TLS_1_2
+
+  RecordSetGroup:
+    Type: AWS::Route53::RecordSetGroup
+    Condition: CreateRecordSetGroup
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      RecordSets:
+        - Name: !Ref CustomDomain
+          Type: A
+          AliasTarget:
+            HostedZoneId: !GetAtt CustomDomain.RegionalHostedZoneId
+            DNSName: !GetAtt CustomDomain.RegionalDomainName
+
+Outputs:
+  CustomDomain:
+    Value: !Ref CustomDomain
+  CertificateArn:
+    Value: !Ref CertificateArn
