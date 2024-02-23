@@ -25,6 +25,13 @@ If provided, creates a record set group connecting the custom domain to a Route5
 - Type: String
 - Default: ""
 
+### HostedZoneName
+
+Can provide this as an alternative to HostedZoneId
+
+- Type: String
+- Default: ""
+
 ## Resources
 
 ### CustomDomain
