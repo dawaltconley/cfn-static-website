@@ -2,7 +2,7 @@
   "name": "@dawaltconley/cfn-static-website",
   "version": "3.1.0",
   "description": "Modular cloudformation stacks for an AWS static website.",
-  "main": "static-website.template.yaml",
+  "main": "index.js",
   "scripts": {
     "update-docs": "deno run --allow-read --allow-write document.js",
     "preversion": "npm run update-docs",
