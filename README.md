@@ -20,7 +20,7 @@ in their descriptions.
 Install the templates using npm:
 
 ```
-npm install --save-dev github:dawaltconley/cfn-static-website#semver:^3.0.0
+npm install --save-dev @dawaltconley/cfn-static-website
 ```
 
 Create a template that references these as nested templates:
