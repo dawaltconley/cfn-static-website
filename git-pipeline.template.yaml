@@ -94,6 +94,10 @@ Parameters:
     Type: String
     Description: Phone number to receive notifications when the build fails.
     Default: ''
+  AlarmDisplayName:
+    Type: String
+    Description: Human-readable display name for the alarm subscription topic.
+    Default: ''
 
 Conditions:
   HasSiteBucketEnvVariable: !Not [!Equals [!Ref SiteBucketEnvVariable, '']]
@@ -105,6 +109,7 @@ Conditions:
   S3Cache: !Equals [!Ref CacheType, S3]
   HasCacheExpiration: !Not [!Equals [!Ref CacheExpiration, '0']]
   HasSourceCredentials: !Not [!Equals [!Ref SourceCredentials, '']]
+  HasAlarmDisplayName: !Not [!Equals [!Ref AlarmDisplayName, '']]
   HasAlarmEmail: !Not [!Equals [!Ref AlarmEmail, '']]
   HasAlarmPhone: !Not [!Equals [!Ref AlarmPhone, '']]
   CreateAlarm: !Or
@@ -269,6 +274,10 @@ Resources:
     Type: AWS::SNS::Topic
     Condition: CreateAlarm
     Properties:
+      DisplayName: !If
+        - HasAlarmDisplayName
+        - !Ref AlarmDisplayName
+        - !Ref AWS::NoValue
       Subscription:
         - !If
           - HasAlarmEmail
