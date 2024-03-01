@@ -107,7 +107,7 @@ Conditions:
   HasSourceCredentials: !Not [!Equals [!Ref SourceCredentials, '']]
   HasAlarmEmail: !Not [!Equals [!Ref AlarmEmail, '']]
   HasAlarmPhone: !Not [!Equals [!Ref AlarmPhone, '']]
-  CreateAlarm: !And
+  CreateAlarm: !Or
     - !Condition HasAlarmEmail
     - !Condition HasAlarmPhone
 
