@@ -119,6 +119,27 @@ Personal Access Token, or ARN of CodeBuild Source Credential.
 - Type: String
 - Default: ""
 
+### AlarmEmail
+
+Email address to receive notifications when the build fails.
+
+- Type: String
+- Default: ""
+
+### AlarmPhone
+
+Phone number to receive notifications when the build fails.
+
+- Type: String
+- Default: ""
+
+### AlarmDisplayName
+
+Human-readable display name for the alarm subscription topic.
+
+- Type: String
+- Default: ""
+
 ## Resources
 
 ### Build
@@ -137,3 +158,13 @@ Personal Access Token, or ARN of CodeBuild Source Credential.
 ### ServiceRole
 
 - Type: AWS::IAM::Role
+
+### Alarm
+
+- Type: AWS::CloudWatch::Alarm
+- Condition: CreateAlarm
+
+### AlarmTopic
+
+- Type: AWS::SNS::Topic
+- Condition: CreateAlarm
