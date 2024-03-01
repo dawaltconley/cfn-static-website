@@ -6,7 +6,8 @@
   "scripts": {
     "update-docs": "deno run --allow-read --allow-write document.js",
     "preversion": "npm run update-docs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cfn-lint *.template.yaml",
+    "prepublishOnly": "npm test"
   },
   "repository": {
     "type": "git",
