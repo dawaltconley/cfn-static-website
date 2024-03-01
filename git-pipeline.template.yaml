@@ -86,6 +86,14 @@ Parameters:
     Type: String
     Description: Personal Access Token, or ARN of CodeBuild Source Credential.
     Default: ''
+  AlarmEmail:
+    Type: String
+    Description: Email address to receive notifications when the build fails.
+    Default: ''
+  AlarmPhone:
+    Type: String
+    Description: Phone number to receive notifications when the build fails.
+    Default: ''
 
 Conditions:
   HasSiteBucketEnvVariable: !Not [!Equals [!Ref SiteBucketEnvVariable, '']]
@@ -97,6 +105,11 @@ Conditions:
   S3Cache: !Equals [!Ref CacheType, S3]
   HasCacheExpiration: !Not [!Equals [!Ref CacheExpiration, '0']]
   HasSourceCredentials: !Not [!Equals [!Ref SourceCredentials, '']]
+  HasAlarmEmail: !Not [!Equals [!Ref AlarmEmail, '']]
+  HasAlarmPhone: !Not [!Equals [!Ref AlarmPhone, '']]
+  CreateAlarm: !And
+    - !Condition HasAlarmEmail
+    - !Condition HasAlarmPhone
 
 Resources:
   Build:
@@ -233,3 +246,37 @@ Resources:
                     - 'secretsmanager:DescribeSecret'
                     - 'secretsmanager:ListSecretVersionIds'
                 - !Ref AWS::NoValue
+  Alarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: CreateAlarm
+    Properties:
+      AlarmDescription: !Sub 'Build failed for ${SourceLocation}'
+      AlarmActions:
+        - !Ref AlarmTopic
+      MetricName: FailedBuilds
+      Namespace: AWS/CodeBuild
+      Statistic: Sum # changed from Average
+      Dimensions:
+        - Name: ProjectName
+          Value: !Ref Build
+      Period: 300
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 0.0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: ignore
+  AlarmTopic:
+    Type: AWS::SNS::Topic
+    Condition: CreateAlarm
+    Properties:
+      Subscription:
+        - !If
+          - HasAlarmEmail
+          - Endpoint: !Ref AlarmEmail
+            Protocol: email
+          - !Ref AWS::NoValue
+        - !If
+          - HasAlarmPhone
+          - Endpoint: !Ref AlarmPhone
+            Protocol: sms
+          - !Ref AWS::NoValue
